@@ -17,13 +17,18 @@ class UserAccount:
     # purchase new machines
     def buy_machines(self, n_machines):
         '''
+        Not to be used alone
         n_machines -> number of machines to be purchased
         '''
-        pass
+        # update total number of machines owned
+        self.machines += n_machines
+        # update capital
+        self.capital -= 600 * n_machines
 
     # switch the machines on/off
     def machine_swith(self, swith):
         '''
+        Not to be used alone
         switch -> on/off (str)
         '''
         pass
@@ -31,10 +36,21 @@ class UserAccount:
     # sell SDPA coin
     def sell_coins(self, n_coins):
         '''
+        Not to be used alone
         n_coins -> numer of coins to be sold
+        '''
+        pass
+    
+    # switch mining type (solo/pooled)
+    def mining_switch(self):
+        '''
+        Not to be used alone
         '''
         pass
 
     # bankruptcy check
     def bankrupt_check(self):
+        '''
+        Not to be used alone
+        '''
         pass
