@@ -15,6 +15,8 @@ class UserAccount:
         self.machines = 0
         # initial machine status
         self.machine_status = 'off'
+        # initial mining type
+        self.mining_type = 'solo'
     
     # purchase new machines
     def buy_machines(self, n_machines):
@@ -71,11 +73,25 @@ class UserAccount:
 
     
     # switch mining type (solo/pooled)
-    def mining_type(self):
+    def change_mining_type(self, mine_type):
         '''
         Not to be used alone
+        mine_type -> (str) 'solo' or 'pooled'
         '''
-        pass
+        try:
+            # change mining type to solo
+            if mine_type == 'solo':
+                self.mining_type = 'solo'
+            # change mining type to pooled
+            elif mine_type == 'pooled':
+                self.mining_type = 'pooled'
+            # raise error if any other values are entered
+            else:
+                raise ValueError("Invalid value: It only accepts 'solo' or 'pooled'")
+
+        # print error message    
+        except ValueError as err:
+            print(err)
 
     # bankruptcy check
     def bankrupt_check(self):
@@ -107,7 +123,7 @@ class UserAccount:
         # if choose to switch ASIC machine (on/off)
         elif action == 3:
             try:
-                # prevent any change to machine status if the user owns 0 machines
+                # prevent changes to machine status if the user owns 0 machines
                 if self.machines == 0:
                     raise ValueError("No machines owned: Cannot switch machine status without owning any machines.")
 
@@ -115,6 +131,22 @@ class UserAccount:
                 switch = input("Enter 'on' to turn on the machines or 'off' to turn them off: ")
                 # update the machine status
                 self.machine_swith(switch)
+
+            # print error message
+            except ValueError as err:
+                print(err)
+
+        # if choose to mining type
+        elif action == 4:
+            try:
+                # prevent changes to mining type if the user owns 0 machines
+                if self.machines == 0:
+                    raise ValueError("No machines owned: Cannot switch mining type without owning any machines.")
+
+                # query for mining type
+                mine_type = input("Enter mining type ['solo'/'pooled']: ")
+                # update mining type
+                self.change_mining_type(mine_type)
 
             # print error message
             except ValueError as err:
