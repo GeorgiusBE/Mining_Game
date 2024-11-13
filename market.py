@@ -12,3 +12,8 @@ class market:
     def new_sdpa_price(self):
         self.sdpa_price *= (1 + random.gauss(0.01, 0.005))
         return self.sdpa_price
+    
+    # generate new electricity price
+    def new_elec_price(self):
+        self.elec_price = random.uniform(1.5, 3.5)
+        return self.elec_price
