@@ -13,6 +13,8 @@ class UserAccount:
         self.sdpa_balance = 0
         # intial number of machines
         self.machines = 0
+        # initial machine status
+        self.machine_status = 'off'
     
     # purchase new machines
     def buy_machines(self, n_machines):
@@ -26,12 +28,25 @@ class UserAccount:
         self.capital -= 600 * n_machines
 
     # switch the machines on/off
-    def machine_swith(self, swith):
+    def machine_swith(self, switch):
         '''
         Not to be used alone
-        switch -> on/off (str)
+        switch -> it accepts either 'on' or 'off' (str)
         '''
-        pass
+        try:
+            # turn on the machines
+            if switch == 'on':
+                self.machine_status = 'on'
+            # turn off the machines
+            elif switch == 'off':
+                self.machine_status = 'off'
+            # raise error if any other values are entered
+            else:
+                raise ValueError("Invalid value: It only accepts 'on' or 'off'")
+
+        # print error message    
+        except ValueError as err:
+            print(err)
 
     # sell SDPA coin
     def sell_sdpa(self, n_coins, sdpa_price):
@@ -40,8 +55,8 @@ class UserAccount:
         n_coins -> number of coins to be sold
         sdpa_price -> the market price of SDPA coin
         '''
-        # short-selling is not allowed
         try:
+            # short-selling is not allowed
             if n_coins > self.sdpa_balance:
                 raise ValueError("Insufficient balance: Cannot sell more SDPA coins than currently owned. Short-selling is not allowed.")
             # update SDPA coin balance
@@ -50,12 +65,13 @@ class UserAccount:
             # update capital
             self.capital += sdpa_price * n_coins
 
+        # print error message
         except ValueError as err:
             print(err)
 
     
     # switch mining type (solo/pooled)
-    def mining_switch(self):
+    def mining_type(self):
         '''
         Not to be used alone
         '''
@@ -87,3 +103,19 @@ class UserAccount:
             sdpa_sold = int(input('Enter number of SDPA coins to be sold: '))
             # update SDPA coin balance and capital
             self.sell_sdpa(sdpa_sold, sdpa_price)
+
+        # if choose to switch ASIC machine (on/off)
+        elif action == 3:
+            try:
+                # prevent any change to machine status if the user owns 0 machines
+                if self.machines == 0:
+                    raise ValueError("No machines owned: Cannot switch machine status without owning any machines.")
+
+                # query for on/off instruction
+                switch = input("Enter 'on' to turn on the machines or 'off' to turn them off: ")
+                # update the machine status
+                self.machine_swith(switch)
+
+            # print error message
+            except ValueError as err:
+                print(err)
