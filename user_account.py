@@ -37,14 +37,22 @@ class UserAccount:
     def sell_sdpa(self, n_coins, sdpa_price):
         '''
         Not to be used alone
-        n_coins -> numer of coins to be sold
+        n_coins -> number of coins to be sold
         sdpa_price -> the market price of SDPA coin
         '''
-        # update SDPA coin balance
-        self.sdpa_balance -= n_coins
-        # update capital
-        self.capital += sdpa_price * n_coins
-        
+        # short-selling is not allowed
+        try:
+            if n_coins > self.sdpa_balance:
+                raise ValueError("Insufficient balance: Cannot sell more SDPA coins than currently owned. Short-selling is not allowed.")
+            # update SDPA coin balance
+            self.sdpa_balance -= n_coins
+
+            # update capital
+            self.capital += sdpa_price * n_coins
+
+        except ValueError as err:
+            print(err)
+
     
     # switch mining type (solo/pooled)
     def mining_switch(self):
@@ -72,8 +80,6 @@ class UserAccount:
             n_machines = int(input('Enter number of ASIC machines to buy: '))
             # update total machines owned and capital
             self.buy_machines(n_machines)
-            # print current status of user
-
 
         # if choose to sell SDPA coins
         elif action == 2:
