@@ -54,20 +54,18 @@ Enter action number: '''))
             # break the loop if the user chooses to end action
             if action == 5:
                 break
-            # if number of machines is zero, action 3 and 4 are considered invalid actions 
-            elif (user.machines == 0 and action == 3) or (user.machines == 0 and action == 4):
-                # ######################## [TBC enter error message] ###############################################3
 
             # short selling is not allowed
             elif (user.sdpa_balance == 0 and action == 2):
                 # ######################## [TBC enter error message] ###############################################
+                pass
 
             # perform the specified action
             user.action_query(action, sdpa_price_tdy)
             
             # print current status of user
             if user.machines != 0:
-                print(f'{user.name}\'s current balance = {user.capital} GBP; number of SDPA coins = {user.sdpa_balance}; number of ASIC = {user.machines}; mining status = (on, solo).')
+                print(f'{user.name}\'s current balance = {user.capital} GBP; number of SDPA coins = {user.sdpa_balance}; number of ASIC = {user.machines}; mining status = ({user.machine_status}, {user.mining_type}).')
             elif user.machines == 0:
                 print(f'{user.name}\'s current balance = {user.capital} GBP; number of SDPA coins = {user.sdpa_balance}; number of ASIC = {user.machines}.')
 
