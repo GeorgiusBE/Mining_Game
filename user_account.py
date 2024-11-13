@@ -34,12 +34,17 @@ class UserAccount:
         pass
 
     # sell SDPA coin
-    def sell_coins(self, n_coins):
+    def sell_sdpa(self, n_coins, sdpa_price):
         '''
         Not to be used alone
         n_coins -> numer of coins to be sold
+        sdpa_price -> the market price of SDPA coin
         '''
-        pass
+        # update SDPA coin balance
+        self.sdpa_balance -= n_coins
+        # update capital
+        self.capital += sdpa_price * n_coins
+        
     
     # switch mining type (solo/pooled)
     def mining_switch(self):
@@ -54,3 +59,25 @@ class UserAccount:
         Not to be used alone
         '''
         pass
+
+    # query user to pick an action
+    def action_query(self, action, sdpa_price):
+        '''
+        sdpa_price -> the market price of the SDPA coin
+        '''
+        
+        # if choose to buy mining machines
+        if action == 1:
+            # query for the number of machines to purchase
+            n_machines = int(input('Enter number of ASIC machines to buy: '))
+            # update total machines owned and capital
+            self.buy_machines(n_machines)
+            # print current status of user
+
+
+        # if choose to sell SDPA coins
+        elif action == 2:
+            # query for the number of coins to be sold
+            sdpa_sold = int(input('Enter number of SDPA coins to be sold: '))
+            # update SDPA coin balance and capital
+            self.sell_sdpa(sdpa_sold, sdpa_price)
