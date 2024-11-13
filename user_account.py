@@ -115,10 +115,18 @@ class UserAccount:
 
         # if choose to sell SDPA coins
         elif action == 2:
-            # query for the number of coins to be sold
-            sdpa_sold = int(input('Enter number of SDPA coins to be sold: '))
-            # update SDPA coin balance and capital
-            self.sell_sdpa(sdpa_sold, sdpa_price)
+            try:
+                # prevent short selling
+                if self.sdpa_balance == 0:
+                    raise ValueError("Zero SDPA coin balance: Short-selling is not allowed.")
+                # query for the number of coins to be sold
+                sdpa_sold = int(input('Enter number of SDPA coins to be sold: '))
+                # update SDPA coin balance and capital
+                self.sell_sdpa(sdpa_sold, sdpa_price)
+            
+            # print error message
+            except ValueError as err:
+                print(err)
 
         # if choose to switch ASIC machine (on/off)
         elif action == 3:

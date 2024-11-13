@@ -55,11 +55,6 @@ Enter action number: '''))
             if action == 5:
                 break
 
-            # short selling is not allowed
-            elif (user.sdpa_balance == 0 and action == 2):
-                # ######################## [TBC enter error message] ###############################################
-                pass
-
             # perform the specified action
             user.action_query(action, sdpa_price_tdy)
             
