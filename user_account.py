@@ -119,8 +119,14 @@ class UserAccount:
                 # prevent short selling
                 if self.sdpa_balance == 0:
                     raise ValueError("Zero SDPA coin balance: Short-selling is not allowed.")
+                
                 # query for the number of coins to be sold
-                sdpa_sold = int(input('Enter number of SDPA coins to be sold: '))
+                sdpa_sold = int(input('Enter the number of SDPA coins to be sold: '))
+
+                # prevent selling negative quantity of SDPA coins
+                if sdpa_sold < 0:
+                    raise ValueError("Invalid quantity: The number of SDPA coins to be sold cannot be negative")
+
                 # update SDPA coin balance and capital
                 self.sell_sdpa(sdpa_sold, sdpa_price)
             
