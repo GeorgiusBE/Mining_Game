@@ -68,8 +68,25 @@ Enter action number: '''))
             user.action_query(action, sdpa_price_tdy)
         
         # summarize user's status into a dictionary
-        user_config['user.name'] = [user.machine_status, user.machines, user.mining_type]
+        user_config[user.name] = [user.machine_status, user.mining_type, user.machines]
     
     # print end of day results
-    # total number of machines; electricity bill to each player; winner of the BlockChain
-    
+    # end-of-day winner
+    sdpa_blockchain = BlockChain(user_config)
+    day_winners = sdpa_blockchain.winner()
+    print(f'{day_winners[0].capitalize()} wins PoW mining.')
+
+    # update the winners' sdpa coin balance
+    for player, prize in day_winners[1].items():
+        print(prize)
+        for user in lst_users:
+            # check for matching user name
+            if user.name == player:
+                # update sdpa balance
+                user.sdpa_balance += prize
+                break
+
+    # print total number of machines
+    print(f'Total number of ASIC machines: {sdpa_blockchain.total_machines}')
+
+    # print electricity bill to each player
