@@ -19,6 +19,11 @@ for i in range(n_users):
 
 # create Market object
 market = Market()
+
+# dictionary to users' configuration (to be used for the input in BlockChain class)
+user_config = {}
+
+# iterate through each day
 for i in range(n_days):
     print(f'''Trading Day {i + 1}
 ------------- ''')
@@ -61,6 +66,10 @@ Enter action number: '''))
 
             # perform the specified action
             user.action_query(action, sdpa_price_tdy)
-
-
         
+        # summarize user's status into a dictionary
+        user_config['user.name'] = [user.machine_status, user.machines, user.mining_type]
+    
+    # print end of day results
+    # total number of machines; electricity bill to each player; winner of the BlockChain
+    
