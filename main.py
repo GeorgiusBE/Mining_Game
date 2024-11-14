@@ -2,6 +2,7 @@
 import random
 from market import Market
 from user_account import UserAccount
+from blockchain import BlockChain
 
 # query for number of days
 n_days = int(input('Enter number of days in the simulation: '))
@@ -35,14 +36,17 @@ for i in range(n_days):
     elec_price_tdy = market.new_elec_price()
     print(f'Today\'s unit price of electricity is {elec_price_tdy} GBP')
 
-    # loop through each defined users
+    # iterate through each defined users
     for u in range(n_users):
         user = lst_users[u]
-        # print current status of user
-        print(f'{user.name}\'s current balance = {user.capital} GBP; number of SDPA coins = {user.sdpa_balance}; number of ASIC = {user.machines}.')
-
+        
         # prompt the user with the query until action 5 is chosen
         while True:
+            # print the current status of user
+            if user.machines != 0:
+                print(f'{user.name}\'s current balance = {user.capital} GBP; number of SDPA coins = {user.sdpa_balance}; number of ASIC = {user.machines}; mining status = ({user.machine_status}, {user.mining_type}).')
+            elif user.machines == 0:
+                print(f'{user.name}\'s current balance = {user.capital} GBP; number of SDPA coins = {user.sdpa_balance}; number of ASIC = {user.machines}.')
             # query the user with list of actions
             action = int(input('''Select which action to make,
 1. Purchase mining machines
@@ -57,12 +61,6 @@ Enter action number: '''))
 
             # perform the specified action
             user.action_query(action, sdpa_price_tdy)
-            
-            # print current status of user
-            if user.machines != 0:
-                print(f'{user.name}\'s current balance = {user.capital} GBP; number of SDPA coins = {user.sdpa_balance}; number of ASIC = {user.machines}; mining status = ({user.machine_status}, {user.mining_type}).')
-            elif user.machines == 0:
-                print(f'{user.name}\'s current balance = {user.capital} GBP; number of SDPA coins = {user.sdpa_balance}; number of ASIC = {user.machines}.')
 
 
         
