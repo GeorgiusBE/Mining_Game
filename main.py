@@ -9,7 +9,7 @@ n_days = int(input('Enter number of days in the simulation: '))
 # query for number of users
 n_users = int(input('Enter number of users in the simulation: '))
 
-# list of users
+# list of all users
 lst_users = []
 for i in range(n_users):
     # query for user names
@@ -20,8 +20,8 @@ for i in range(n_users):
 # create Market object
 market = Market()
 
-# dictionary to users' configuration (to be used for the input in BlockChain class)
-user_config = {}
+# list of operational (non-bankrupt) users
+oper_users = lst_users
 
 # iterate through each day
 for i in range(n_days):
@@ -41,10 +41,11 @@ for i in range(n_days):
     elec_price_tdy = market.new_elec_price()
     print(f'Today\'s unit price of electricity is {elec_price_tdy} GBP')
 
+    # dictionary to users' configuration (to be used for the input in BlockChain class)
+    user_config = {}
+
     # iterate through each defined users
-    for u in range(n_users):
-        user = lst_users[u]
-        
+    for user in oper_users:
         # prompt the user with the query until action 5 is chosen
         while True:
             # print user status when machines owned is not zero
@@ -71,32 +72,54 @@ Enter action number: '''))
         # summarize user's status into a dictionary
         user_config[user.name] = [user.machine_status, user.mining_type, user.machines]
     
-    # end-of-day winner
+    # create BlockChain object
     sdpa_blockchain = BlockChain(user_config)
-    day_winners = sdpa_blockchain.winner()
 
-    # print end-of-day winner/s and the prize distributed
-    print(f'{day_winners[0].capitalize()} wins PoW mining.')
-
-    # update the winners' sdpa coin balance
-    print('Prize distribution:')
-    for player, prize in day_winners[1].items():
-        # print the distributed prize)
-        print(f'{player.capitalize()} receives {prize} SDPA coins.')
-        
-        for user in lst_users:
-            # check for matching user name
-            if user.name == player:
-                # update sdpa balance
-                user.sdpa_balance += prize
-                break
-
-    # print total number of machines
+    # print total number of machines today
     print(f'Total number of ASIC machines: {sdpa_blockchain.total_machines}')
 
+    # print end-of-day winner/s and the prize distributed
+    day_winners = sdpa_blockchain.winner()
+    print(f'{day_winners[0].capitalize()} wins PoW mining.')
+    
+    # distribute prize to the winner/s
+    print('Prize distribution:')
+    if not day_winners[1]: # if there is no winner (i.e. the pool wins with no players in the pool)
+        print('No SDPA coins were distributed to users.')
+    else: # if there is a winning player/s
+        for player, prize in day_winners[1].items():
+            # print the distributed prize)
+            print(f'{player.capitalize()} receives {prize} SDPA coins.')
+            
+            for user in oper_users:
+                # check for matching user name
+                if user.name == player:
+                    # update winner's sdpa balance
+                    user.sdpa_balance += prize
+                    break
+
+    # electricity bill record
+    all_bills = {}
     # record electricity bill
+    for user in oper_users:
+        # update electricity bill record
+        all_bills[user.name] = user.electricity_bill(elec_price_tdy)
+
+    # print electricity bill
     print('Electricity bill:')
-    for user in lst_users:
-        user_bill = user.electricity_bill(elec_price_tdy)
-        if user_bill is not None:
-            print(f'{user.name.capitalize()} pays {user_bill} GBP.')
+    if not all_bills:
+        print('No electricity bill.')
+    else:
+        for user, bill in all_bills.items():
+            print(f'{user.capitalize()} pays {bill} GBP.')   
+
+    # check for bankruptcy
+    for user in oper_users.copy():
+        user.bankrupt_check(sdpa_price_tdy)
+        # remove bankrupt users from list of operational users
+        if user.bankrupt_status == 'yes':
+            oper_users.remove(user)
+
+    # stop the loop when all users are bankrupt
+    if not oper_users:
+        break
