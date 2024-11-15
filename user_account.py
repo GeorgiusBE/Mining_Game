@@ -17,6 +17,9 @@ class UserAccount:
         self.machine_status = 'off'
         # initial mining type
         self.mining_type = 'solo'
+        # bankruptcy status
+            # 'yes' to indicate bankruptcy, otherwise 'no'
+        self.bankrupt_status = 'no'
     
     # purchase new machines
     def buy_machines(self, n_machines):
@@ -92,13 +95,6 @@ class UserAccount:
         # print error message    
         except ValueError as err:
             print(err)
-
-    # bankruptcy check
-    def bankrupt_check(self):
-        '''
-        Not to be used alone
-        '''
-        pass
 
     # query user to pick an action
     def action_query(self, action, sdpa_price):
@@ -178,5 +174,38 @@ class UserAccount:
             # update user's capital
             self.capital -= self.total_bill
             return self.total_bill
+        else:
+            pass
+    
+    # check for bankruptcy
+    def bankrupt_check(self, sdpa_price):
+        '''
+        sdpa_price -> market price of SDPA coin today
+        '''
+        # check for negative capital
+        if self.capital < 0:
+            # store the number of coins sold
+            sdpa_auto_sale = 0
+            # sell SDPA coin 1 unit at a time until the balance is no longer negative or bankruptcy is declared
+            while True:
+                # check whether the user owns any SDPA coin
+                if self.sdpa_balance > 0:
+                    # sell 1 unit of SDPA coin
+                    self.sell_sdpa(1, sdpa_price)
+
+                    # update sdpa_auto_sale
+                    sdpa_auto_sale += 1
+                    
+                    # stop selling when balance is positive
+                    if self.capital >= 0:
+                        return f'{sdpa_auto_sale} SDPA coins have been automatically sold to cover negative capital.'
+                
+                # declare bakrupt
+                else:
+                    # update bankruptcy status
+                    self.bankrupt_status = 'yes'
+                    return f"{self.name} has declared bankruptcy. All of {self.name}'s ASIC machines will be taken offline."
+        
+        # do nothing when capital is positive
         else:
             pass
