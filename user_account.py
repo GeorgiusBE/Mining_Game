@@ -165,3 +165,18 @@ class UserAccount:
             # print error message
             except ValueError as err:
                 print(err)
+    
+    # charging electricity bill    
+    def electricity_bill(self, electricity_unit_price):
+        '''
+        electricity_unit_price -> the price for 1 unit of electricity (use the electricity price generated from Market class)
+        '''
+        # only charge electricity bill when the machines are on
+        if self.machine_status == 'on':
+            # compute total bill
+            self.total_bill = self.machines * electricity_unit_price
+            # update user's capital
+            self.capital -= self.total_bill
+            return self.total_bill
+        else:
+            pass
