@@ -12,12 +12,12 @@ class BlockChain:
         # users machine configurations
         self.user_config = user_config
 
-        # compute total number of machines
+        # compute total number of machines (including active and inactive machines)
         self.total_machines = self.base_pooled_mach
         # create a dictionary to store the players (i.e. users with machines that are turned on)
         self.mining_players = {'pooled': self.base_pooled_mach}
         for user_name,config in user_config.items():
-            # update the total number of machines (including active and inactive machines)
+            # update the total number of machines
             self.total_machines += config[2]
 
             # users with machines switched off
@@ -71,11 +71,16 @@ class BlockChain:
                 if player_winner == 'pooled':
                     # players and their respective active machines in the pool
                     pooled_players = {}
-                    # extract the number of active machines for each pooled players 
-                    for user_name, config in self.user_config.items():
-                        if config[1] == 'pooled' and config[0] == 'on':
-                            # extract the number of machines of the pooled player
-                            pooled_players[user_name] = config[2]
+                    
+                    # avoid the loop when there are no players in the pool (to improve performance)
+                    if self.mining_players['pooled'] == self.base_pooled_mach:
+                        pass
+                    else:
+                        # extract the number of active machines for each pooled players 
+                        for user_name, config in self.user_config.items():
+                            if config[1] == 'pooled' and config[0] == 'on':
+                                # extract the number of machines of the pooled player
+                                pooled_players[user_name] = config[2]
                 
                     # store distributed prize
                     dist_prize = {}
