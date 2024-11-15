@@ -198,14 +198,15 @@ class UserAccount:
                     
                     # stop selling when balance is positive
                     if self.capital >= 0:
-                        return f'{sdpa_auto_sale} SDPA coins have been automatically sold to cover negative capital.'
-                
+                        print(f'{sdpa_auto_sale} SDPA coins belonging to {self.name.capitalize()} were automatically sold to resolve the negative capital balance.')
+                        break    
                 # declare bakrupt
                 else:
                     # update bankruptcy status
                     self.bankrupt_status = 'yes'
-                    return f"{self.name} has declared bankruptcy. All of {self.name}'s ASIC machines will be taken offline."
-        
+                    print(f"{self.name.capitalize()} has declared bankruptcy. All of {self.name.capitalize()}'s ASIC machines will be taken offline.")
+                    break
+
         # do nothing when capital is positive
         else:
             pass
