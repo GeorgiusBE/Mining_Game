@@ -47,10 +47,11 @@ for i in range(n_days):
         
         # prompt the user with the query until action 5 is chosen
         while True:
-            # print the current status of user
+            # print user status when machines owned is not zero
             if user.machines != 0:
                 print(f'{user.name}\'s current balance = {user.capital} GBP; number of SDPA coins = {user.sdpa_balance}; number of ASIC = {user.machines}; mining status = ({user.machine_status}, {user.mining_type}).')
-            elif user.machines == 0:
+            # print user status when user owns zero machine
+            else:
                 print(f'{user.name}\'s current balance = {user.capital} GBP; number of SDPA coins = {user.sdpa_balance}; number of ASIC = {user.machines}.')
             # query the user with list of actions
             action = int(input('''Select which action to make,
@@ -70,15 +71,19 @@ Enter action number: '''))
         # summarize user's status into a dictionary
         user_config[user.name] = [user.machine_status, user.mining_type, user.machines]
     
-    # print end of day results
     # end-of-day winner
     sdpa_blockchain = BlockChain(user_config)
     day_winners = sdpa_blockchain.winner()
+
+    # print end-of-day winner/s and the prize distributed
     print(f'{day_winners[0].capitalize()} wins PoW mining.')
 
     # update the winners' sdpa coin balance
+    print('Prize distribution:')
     for player, prize in day_winners[1].items():
-        print(prize)
+        # print the distributed prize)
+        print(f'{player.capitalize()} receives {prize} SDPA coins.')
+        
         for user in lst_users:
             # check for matching user name
             if user.name == player:
@@ -89,4 +94,9 @@ Enter action number: '''))
     # print total number of machines
     print(f'Total number of ASIC machines: {sdpa_blockchain.total_machines}')
 
-    # print electricity bill to each player
+    # record electricity bill
+    print('Electricity bill:')
+    for user in lst_users:
+        user_bill = user.electricity_bill(elec_price_tdy)
+        if user_bill is not None:
+            print(f'{user.name.capitalize()} pays {user_bill} GBP.')
