@@ -31,6 +31,8 @@ class UserAccount:
         self.machines += n_machines
         # update capital
         self.capital -= 600 * n_machines
+        # update activity log
+        self.user_activity_log[f'Day {self.current_day}']['Action 1'].append(n_machines)
 
     # switch the machines on/off
     def machine_swith(self):
@@ -43,6 +45,8 @@ class UserAccount:
         # turn on the machines if the machines are currently off
         elif self.machine_status == 'off':
             self.machine_status = 'on'
+        # update activity log
+        self.user_activity_log[f'Day {self.current_day}']['Action 3'].append(self.machine_status)
 
     # sell SDPA coin
     def sell_sdpa(self, n_coins, sdpa_price):
@@ -61,6 +65,9 @@ class UserAccount:
             # update capital
             self.capital += sdpa_price * n_coins
 
+            # update activity log
+            self.user_activity_log[f'Day {self.current_day}']['Action 2'].append(n_coins)
+
         # print error message
         except ValueError as err:
             print(err)
@@ -76,13 +83,27 @@ class UserAccount:
         # change mining type to solo if current mining type is pooled
         elif self.mining_type == 'pooled':
             self.mining_type = 'solo'
+        # update activity log
+        self.user_activity_log[f'Day {self.current_day}']['Action 4'].append(self.mining_type)
+
+    # create activity log
+    def create_user_activity_log(self, n_days):
+        '''
+        n_days -> total number of days
+        '''
+        # blank activity log
+        self.user_activity_log = {f'Day {n}' : {'Action 1' : [], 'Action 2' : [], 'Action 3' : [], 'Action 4' : []} for n in range(1, n_days+1)}
 
     # query user to pick an action
-    def action_query(self, action, sdpa_price):
+    def action_query(self, action, sdpa_price, current_day):
         '''
+        action -> which action to make (int) [1,2,3,4,5]
         sdpa_price -> the market price of the SDPA coin
+        current_day -> the current day (int)
         '''
-        
+        # define current day
+        self.current_day = current_day
+
         # if choose to buy mining machines
         if action == 1:
             # query for the number of machines to purchase

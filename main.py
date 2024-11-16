@@ -17,6 +17,9 @@ for i in range(n_users):
     user = UserAccount(name)
     lst_users.append(user)
 
+    # initialize activity log
+    user.create_user_activity_log(n_days)
+
 # create Market object
 market = Market()
 
@@ -25,7 +28,8 @@ oper_users = lst_users
 
 # iterate through each day
 for i in range(n_days):
-    print(f'''Trading Day {i + 1}
+    current_day = i + 1
+    print(f'''Trading Day {current_day}
 ------------- ''')
     # print SDPA price for the day
     if i == 0:
@@ -64,7 +68,7 @@ Enter action number: '''))
                 break
 
             # perform the specified action
-            user.action_query(action, sdpa_price_tdy)
+            user.action_query(action, sdpa_price_tdy, current_day)
         
     # create BlockChain object
     sdpa_blockchain = BlockChain(oper_users)
@@ -110,3 +114,9 @@ Enter action number: '''))
     # stop the loop when all users are bankrupt
     if not oper_users:
         break
+
+# combine acitivity log of all users
+all_activity_logs = {}
+for user in lst_users:
+    all_activity_logs[user.name] = user.user_activity_log
+print(all_activity_logs)
