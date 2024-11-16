@@ -32,26 +32,38 @@ class UserAccount:
         # update capital
         self.capital -= 600 * n_machines
 
+    # # switch the machines on/off
+    # def machine_swith(self, switch):
+    #     '''
+    #     Not to be used alone
+    #     switch -> it accepts either 'on' or 'off' (str)
+    #     '''
+    #     try:
+    #         # turn on the machines
+    #         if switch == 'on':
+    #             self.machine_status = 'on'
+    #         # turn off the machines
+    #         elif switch == 'off':
+    #             self.machine_status = 'off'
+    #         # raise error if any other values are entered
+    #         else:
+    #             raise ValueError("Invalid value: It only accepts 'on' or 'off'")
+
+    #     # print error message    
+    #     except ValueError as err:
+    #         print(err)
+
     # switch the machines on/off
-    def machine_swith(self, switch):
+    def machine_swith(self):
         '''
         Not to be used alone
-        switch -> it accepts either 'on' or 'off' (str)
         '''
-        try:
-            # turn on the machines
-            if switch == 'on':
-                self.machine_status = 'on'
-            # turn off the machines
-            elif switch == 'off':
-                self.machine_status = 'off'
-            # raise error if any other values are entered
-            else:
-                raise ValueError("Invalid value: It only accepts 'on' or 'off'")
-
-        # print error message    
-        except ValueError as err:
-            print(err)
+        # turn off the machines if the machines are currently on
+        if self.machine_status == 'on':
+            self.machine_status = 'off'
+        # turn on the machines if the machines are currently off
+        elif self.machine_status == 'off':
+            self.machine_status = 'on'
 
     # sell SDPA coin
     def sell_sdpa(self, n_coins, sdpa_price):
@@ -137,10 +149,8 @@ class UserAccount:
                 if self.machines == 0:
                     raise ValueError("No machines owned: Cannot switch machine status without owning any machines.")
 
-                # query for on/off instruction
-                switch = input("Enter 'on' to turn on the machines or 'off' to turn them off: ")
                 # update the machine status
-                self.machine_swith(switch)
+                self.machine_swith()
 
             # print error message
             except ValueError as err:
