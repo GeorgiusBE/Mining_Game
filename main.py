@@ -107,11 +107,11 @@ Enter action number: '''))
 
     # print electricity bill
     print('Electricity bill:')
-    if not all_bills:
+    if all([value is None for value in all_bills.values()]): # when no 
         print('No electricity bill.')
     else:
         for user, bill in all_bills.items():
-            print(f'{user.capitalize()} pays {bill} GBP.')   
+            print(f'{user.capitalize()} pays {bill} GBP.')
 
     # check for bankruptcy
     for user in oper_users.copy():
