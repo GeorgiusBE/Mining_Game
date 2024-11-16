@@ -1,37 +1,36 @@
 import random
 
 class BlockChain:
-    def __init__(self, user_config):
+    def __init__(self, list_operational_users):
         '''
-        user_config -> (Dict of lists) user_name(str) : [machine status ('on'/'off'),
-                                                         mining_type(str of either 'solo' or 'pooled'),
-                                                         number of machines]
+        list_operational_users -> list of users (in the form of UserAccount class objects) that are operational (not bankrupt).
+        
         '''
         # base number of machines in the pool
         self.base_pooled_mach = 1000
-        # users machine configurations
-        self.user_config = user_config
+        # attribute for the list of UserAccount objects
+        self.list_operational_users = list_operational_users
 
-        # compute total number of machines (including active and inactive machines)
+        # store the total number of machines (including active and inactive machines)
         self.total_machines = self.base_pooled_mach
-        # create a dictionary to store the players (i.e. users with machines that are turned on)
+        # create a dictionary to store the players (i.e. users with machines that are turned on) with their respective computing power
         self.mining_players = {'pooled': self.base_pooled_mach}
-        for user_name,config in user_config.items():
+        for user in list_operational_users:
             # update the total number of machines
-            self.total_machines += config[2]
+            self.total_machines += user.machines
 
             # users with machines switched off
-            if config[0] == 'off':
+            if user.machine_status == 'off':
                 # ignore the user
                 pass
             # active users with solo mining type
-            elif config[1] == 'solo':
+            elif user.mining_type == 'solo':
                 # participate as an individual player
-                self.mining_players[user_name] = config[2]
+                self.mining_players[user.name] = user.machines
             # active users with pooled mining type
-            elif config[1] == 'pooled':
-                # participate as part of a group
-                self.mining_players['pooled'] += config[2]
+            elif user.mining_type == 'pooled':
+                # participate as part of a mining pool
+                self.mining_players['pooled'] += user.machines
 
     # determine the end-of-day winner
     def winner(self):
@@ -61,36 +60,48 @@ class BlockChain:
         prev_cum_prop = 0
         for player_name, cum_prop in self.players_cum_prop.items():
             if rng > prev_cum_prop and rng < cum_prop:
-                # the winning player
+                # define the winning player
                 player_winner = player_name
 
                 # total daily prize
                 total_prize = 100
 
-                # distribute prize for player/s in mining pool
+                # distribute prize when mining pool wins
                 if player_winner == 'pooled':
                     # players and their respective active machines in the pool
                     pooled_players = {}
                     
-                    # avoid the loop when there are no users in the pool (to improve performance)
+                    # avoid the loop when there are no active users in the pool (to improve performance)
                     if self.mining_players['pooled'] == self.base_pooled_mach:
                         pass
                     else:
                         # extract the number of active machines for each pooled players 
-                        for user_name, config in self.user_config.items():
-                            if config[1] == 'pooled' and config[0] == 'on':
-                                # extract the number of machines of the pooled player
-                                pooled_players[user_name] = config[2]
-                
-                    # store distributed prize
+                        for user in self.list_operational_users:
+                            if user.mining_type == 'pooled' and user.machine_status == 'on':
+                                pooled_players[user.name] = user.machines
+
+                    # store the winner's name their prize
                     dist_prize = {}
                     # distribute prize to the players in the pool
                     for player_name, n_machines in pooled_players.items():
-                        dist_prize[player_name] = n_machines/self.mining_players['pooled'] * total_prize
+                        # compute the prize attributable to player
+                        partial_prize = n_machines/self.mining_players['pooled'] * total_prize
+                        
+                        # update dist_prize
+                        dist_prize[player_name] = partial_prize
 
+                        # update users' SDPA balance
+                        for user in self.list_operational_users:
+                            if user.name == player_name:
+                                user.sdpa_balance += partial_prize
 
-                # distribute prize for solo player
+                # distribute prize when solo miner wins
                 else:
+                    # update user's SDPA balance
+                    for user in self.list_operational_users:
+                        if user.name == player_winner:
+                            user.sdpa_balance += total_prize
+                    # store the winner's name their prize
                     dist_prize = {player_winner:total_prize}
 
                 # return the winner and prize 
