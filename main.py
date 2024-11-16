@@ -41,9 +41,6 @@ for i in range(n_days):
     elec_price_tdy = market.new_elec_price()
     print(f'Today\'s unit price of electricity is {elec_price_tdy} GBP')
 
-    # dictionary to users' configuration (to be used for the input in BlockChain class)
-    user_config = {}
-
     # iterate through each defined users
     for user in oper_users:
         # prompt the user with the query until action 5 is chosen
@@ -69,11 +66,8 @@ Enter action number: '''))
             # perform the specified action
             user.action_query(action, sdpa_price_tdy)
         
-        # summarize user's status into a dictionary
-        user_config[user.name] = [user.machine_status, user.mining_type, user.machines]
-    
     # create BlockChain object
-    sdpa_blockchain = BlockChain(user_config)
+    sdpa_blockchain = BlockChain(oper_users)
 
     # print total number of machines today
     print(f'Total number of ASIC machines: {sdpa_blockchain.total_machines}')
@@ -90,13 +84,6 @@ Enter action number: '''))
         for player, prize in day_winners[1].items():
             # print the distributed prize)
             print(f'{player.capitalize()} receives {prize} SDPA coins.')
-            
-            for user in oper_users:
-                # check for matching user name
-                if user.name == player:
-                    # update winner's sdpa balance
-                    user.sdpa_balance += prize
-                    break
 
     # electricity bill record
     all_bills = {}
