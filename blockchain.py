@@ -72,7 +72,7 @@ class BlockChain:
                     # players and their respective active machines in the pool
                     pooled_players = {}
                     
-                    # avoid the loop when there are no players in the pool (to improve performance)
+                    # avoid the loop when there are no users in the pool (to improve performance)
                     if self.mining_players['pooled'] == self.base_pooled_mach:
                         pass
                     else:
@@ -96,5 +96,6 @@ class BlockChain:
                 # return the winner and prize 
                 return player_winner, dist_prize
             
-            # update prev_cum_prop
-            prev_cum_prop = cum_prop
+            else:
+                # update prev_cum_prop
+                prev_cum_prop = cum_prop
