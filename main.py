@@ -17,13 +17,12 @@ for i in range(n_users):
     user = UserAccount(name)
     lst_users.append(user)
 
-    # initialize activity log for each user
-    user.create_user_activity_log(n_days)
-
 # create Market object
 market = Market()
 # create BlockChain object
 sdpa_blockchain = BlockChain(n_days)
+# create user activity log
+user_activity_log = sdpa_blockchain.create_user_activity_log(lst_users)
 
 # list of operational (non-bankrupt) users
 oper_users = lst_users
@@ -68,9 +67,9 @@ Enter action number: '''))
             # break the loop if the user chooses to end action
             if action == 5:
                 break
-
+            
             # perform the specified action
-            user.action_query(action, sdpa_price_tdy, current_day)
+            user.action_query(action, sdpa_price_tdy, current_day, user_activity_log)
   
     # determine the day's winners
     day_winners = sdpa_blockchain.winner(oper_users, current_day)
@@ -107,7 +106,7 @@ Enter action number: '''))
 
     # check for bankruptcy
     for user in oper_users.copy():
-        user.bankrupt_check(sdpa_price_tdy)
+        user.bankrupt_check()
         # remove bankrupt users from list of operational users
         if user.bankrupt_status == 'yes':
             oper_users.remove(user)
@@ -116,12 +115,8 @@ Enter action number: '''))
     if not oper_users:
         break
 
-# combine the acitivity logs for all users
-all_activity_logs = {}
-for user in lst_users:
-    all_activity_logs[user.name] = user.user_activity_log
-# print the combined activity log
-print(all_activity_logs)
+# print the user activity log
+print(user_activity_log)
 
 # print the log of the distributed prize
 print(sdpa_blockchain.winners_log)
