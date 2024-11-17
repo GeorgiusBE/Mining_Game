@@ -6,9 +6,23 @@ class BlockChain:
         '''
         n_days -> total number of days
         '''
+        # store the number of days in the simulation
+        self.n_days = n_days
         # template for winners log
         self.winners_log = {f'Day {n}' : {} for n in range(1, n_days+1)}
 
+   # create activity log
+    def create_user_activity_log(self, lst_users):
+        '''
+        n_days -> total number of days
+        lst_users -> list of UserAccount objects
+        '''
+        # blank activity log
+        self.user_activity_log = {}
+        for user in lst_users:
+            self.user_activity_log[user.name] = {f'Day {n}': {f'Action {i}': [] for i in range(1,5)} for n in range(1, self.n_days+1)}
+        return self.user_activity_log
+    
     # determine the end-of-day winner
     def winner(self, list_operational_users, current_day):
         '''

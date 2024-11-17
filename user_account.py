@@ -29,12 +29,12 @@ class UserAccount:
         Not to be used alone
         n_machines -> number of machines to be purchased
         '''
+        # store the number of machines purchased
+        self.n_machines = n_machines
         # update total number of machines owned
         self.machines += n_machines
         # update capital
         self.capital -= 600 * n_machines
-        # update activity log
-        self.user_activity_log[f'Day {self.current_day}']['Action 1'].append(n_machines)
 
     # switch the machines on/off
     def machine_swith(self):
@@ -47,8 +47,6 @@ class UserAccount:
         # turn on the machines if the machines are currently off
         elif self.machine_status == 'off':
             self.machine_status = 'on'
-        # update activity log
-        self.user_activity_log[f'Day {self.current_day}']['Action 3'].append(self.machine_status)
 
     # sell SDPA coin
     def sell_sdpa(self, n_coins):
@@ -56,6 +54,9 @@ class UserAccount:
         Not to be used alone
         n_coins -> number of coins to be sold
         '''
+        # store the number of coins to be sold
+        self.n_coins = n_coins
+
         try:
             # short-selling is not allowed
             if n_coins > self.sdpa_balance:
@@ -65,9 +66,6 @@ class UserAccount:
 
             # update capital
             self.capital += self.sdpa_price * n_coins
-
-            # update activity log
-            self.user_activity_log[f'Day {self.current_day}']['Action 2'].append(n_coins)
 
         # print error message
         except ValueError as err:
@@ -84,28 +82,18 @@ class UserAccount:
         # change mining type to solo if current mining type is pooled
         elif self.mining_type == 'pooled':
             self.mining_type = 'solo'
-        # update activity log
-        self.user_activity_log[f'Day {self.current_day}']['Action 4'].append(self.mining_type)
-
-    # create activity log
-    def create_user_activity_log(self, n_days):
-        '''
-        n_days -> total number of days
-        '''
-        # blank activity log
-        actions_dict = {f'Action {i}' : [] for i in range(1,5)}
-        self.user_activity_log = {f'Day {n}' : actions_dict for n in range(1, n_days+1)}
 
     # query user to pick an action
-    def action_query(self, action, sdpa_price, current_day):
+    def action_query(self, action, sdpa_price, current_day, user_activity_log):
         '''
         action -> which action to make (int) [1,2,3,4,5]
         sdpa_price -> the market price of the SDPA coin
         current_day -> the current day (int)
+        user_activity_log -> a blank template to record users' activity log. It should have the data structure of ...
         '''
-        # define current day
+        # set the current day
         self.current_day = current_day
-        # define SDPA price today
+        # store today's SDPA price
         self.sdpa_price = sdpa_price
 
         # if choose to buy mining machines
@@ -114,6 +102,8 @@ class UserAccount:
             n_machines = int(input('Enter number of ASIC machines to buy: '))
             # update total machines owned and capital
             self.buy_machines(n_machines)
+            # update activity log
+            user_activity_log[self.name][f'Day {current_day}']['Action 1'].append(self.n_machines)
 
         # if choose to sell SDPA coins
         elif action == 2:
@@ -131,6 +121,9 @@ class UserAccount:
 
                 # update SDPA coin balance and capital
                 self.sell_sdpa(sdpa_sold)
+
+                # update activity log
+                user_activity_log[self.name][f'Day {current_day}']['Action 2'].append(self.n_coins)
             
             # print error message
             except ValueError as err:
@@ -146,6 +139,9 @@ class UserAccount:
                 # update the machine status
                 self.machine_swith()
 
+                # update activity log
+                user_activity_log[self.name][f'Day {current_day}']['Action 3'].append(self.machine_status)
+
             # print error message
             except ValueError as err:
                 print(err)
@@ -160,6 +156,9 @@ class UserAccount:
                 # update mining type
                 self.change_mining_type()
 
+                # update activity log
+                user_activity_log[self.name][f'Day {current_day}']['Action 4'].append(self.mining_type)
+            
             # print error message
             except ValueError as err:
                 print(err)
@@ -190,7 +189,7 @@ class UserAccount:
 
             # check whether the user owns enough SDPA coin
             if sdpa_auto_sale <= self.sdpa_balance:
-                # 
+                # sell the required amount of SDPA coin
                 self.sell_sdpa(sdpa_auto_sale)
                 print(f'{sdpa_auto_sale} SDPA coins belonging to {self.name.capitalize()} were automatically sold to resolve the negative capital balance.')
 
