@@ -166,9 +166,13 @@ class UserAccount:
                 print(err)
     
     # charging electricity bill    
-    def electricity_bill(self, electricity_unit_price):
+    def electricity_bill(self, electricity_unit_price, current_day):
         '''
         electricity_unit_price -> the price for 1 unit of electricity (use the electricity price generated from Market class)
+        current_day -> current day (Note that this is purposefully redefined, and not using the current_day
+                       defined in the action_query method. This is because when action 5 is chosen, action_query
+                       does not get called, and thus the self.current day does not get updated. -> refer to the
+                       "if action == 5: break" line of code in the main.py file.)
         '''
         # only charge electricity bill when the machines are on
         if self.machine_status == 'on':
@@ -176,6 +180,8 @@ class UserAccount:
             self.total_bill = self.machines * electricity_unit_price
             # update user's capital
             self.capital -= self.total_bill
+            # update activity log
+            self.user_activity_log[self.name][f'Day {current_day}']['Electricity'] = self.total_bill
             return self.total_bill
         else:
             pass
@@ -210,6 +216,8 @@ class UserAccount:
                 self.bankrupt_status = 'yes'
                 print(f"{self.name.capitalize()} has declared bankruptcy. All of {self.name.capitalize()}'s ASIC machines will be taken offline.")
 
+                # update activity log
+                self.user_activity_log[self.name][f'Day {current_day}']['Bankrupt'] = self.bankrupt_status
         # do nothing when capital is positive
         else:
             pass

@@ -94,7 +94,7 @@ Enter action number: '''))
     # record electricity bill
     for user in oper_users:
         # update electricity bill record
-        all_bills[user.name] = user.electricity_bill(elec_price_tdy)
+        all_bills[user.name] = user.electricity_bill(elec_price_tdy, current_day)
 
     # print electricity bill
     print('Electricity bill:')
