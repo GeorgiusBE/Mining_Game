@@ -106,7 +106,7 @@ Enter action number: '''))
 
     # check for bankruptcy
     for user in oper_users.copy():
-        user.bankrupt_check()
+        user.bankrupt_check(current_day)
         # remove bankrupt users from list of operational users
         if user.bankrupt_status == 'yes':
             oper_users.remove(user)

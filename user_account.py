@@ -95,6 +95,8 @@ class UserAccount:
         self.current_day = current_day
         # store today's SDPA price
         self.sdpa_price = sdpa_price
+        # store the users activity log
+        self.user_activity_log = user_activity_log
 
         # if choose to buy mining machines
         if action == 1:
@@ -179,7 +181,13 @@ class UserAccount:
             pass
 
     # check for bankruptcy
-    def bankrupt_check(self):
+    def bankrupt_check(self, current_day):
+        '''
+        current_day -> current day (Note that this is purposefully redefined, and not using the current_day
+                       defined in the action_query method. This is because when action 5 is chosen, action_query
+                       does not get called, and thus the self.current day does not get updated. -> refer to the
+                       "if action == 5: break" line of code in the main.py file.)
+        '''
         # check for negative capital
         if self.capital < 0:
             # the required number of coins to be sold to address negative capital
@@ -192,6 +200,9 @@ class UserAccount:
                 # sell the required amount of SDPA coin
                 self.sell_sdpa(sdpa_auto_sale)
                 print(f'{sdpa_auto_sale} SDPA coins belonging to {self.name.capitalize()} were automatically sold to resolve the negative capital balance.')
+
+                # update activity log
+                self.user_activity_log[self.name][f'Day {current_day}']['Action 2'].append(sdpa_auto_sale)
 
             # declare bakruptcy
             else:
