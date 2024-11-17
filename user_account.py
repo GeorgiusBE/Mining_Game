@@ -92,7 +92,8 @@ class UserAccount:
         n_days -> total number of days
         '''
         # blank activity log
-        self.user_activity_log = {f'Day {n}' : {'Action 1' : [], 'Action 2' : [], 'Action 3' : [], 'Action 4' : []} for n in range(1, n_days+1)}
+        actions_dict = {f'Action {i}' : [] for i in range(1,5)}
+        self.user_activity_log = {f'Day {n}' : actions_dict for n in range(1, n_days+1)}
 
     # query user to pick an action
     def action_query(self, action, sdpa_price, current_day):
