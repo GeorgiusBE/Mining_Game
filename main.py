@@ -17,11 +17,13 @@ for i in range(n_users):
     user = UserAccount(name)
     lst_users.append(user)
 
-    # initialize activity log
+    # initialize activity log for each user
     user.create_user_activity_log(n_days)
 
 # create Market object
 market = Market()
+# create BlockChain object
+sdpa_blockchain = BlockChain(n_days)
 
 # list of operational (non-bankrupt) users
 oper_users = lst_users
@@ -69,15 +71,14 @@ Enter action number: '''))
 
             # perform the specified action
             user.action_query(action, sdpa_price_tdy, current_day)
-        
-    # create BlockChain object
-    sdpa_blockchain = BlockChain(oper_users)
-
+  
+    # determine the day's winners
+    day_winners = sdpa_blockchain.winner(oper_users, current_day)
+    
     # print total number of machines today
     print(f'Total number of ASIC machines: {sdpa_blockchain.total_machines}')
 
     # print end-of-day winner/s and the prize distributed
-    day_winners = sdpa_blockchain.winner()
     print(f'{day_winners[0].capitalize()} wins PoW mining.')
     
     # distribute prize to the winner/s
@@ -115,8 +116,12 @@ Enter action number: '''))
     if not oper_users:
         break
 
-# combine acitivity log of all users
+# combine the acitivity logs for all users
 all_activity_logs = {}
 for user in lst_users:
     all_activity_logs[user.name] = user.user_activity_log
+# print the combined activity log
 print(all_activity_logs)
+
+# print the log of the distributed prize
+print(sdpa_blockchain.winners_log)
