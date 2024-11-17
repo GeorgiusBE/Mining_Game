@@ -1,14 +1,23 @@
 import random
 
 class BlockChain:
-    def __init__(self, list_operational_users):
+    def __init__(self, n_days):
+        # create winners log
+        '''
+        n_days -> total number of days
+        '''
+        # template for winners log
+        self.winners_log = {f'Day {n}' : {} for n in range(1, n_days+1)}
+
+    # determine the end-of-day winner
+    def winner(self, list_operational_users, current_day):
         '''
         list_operational_users -> list of users (in the form of UserAccount class objects) that are operational (not bankrupt).
-        
+        current_day -> the current day (int)
         '''
         # base number of machines in the pool
         self.base_pooled_mach = 1000
-        # attribute for the list of UserAccount objects
+        # create an attribute for the list of UserAccount objects
         self.list_operational_users = list_operational_users
 
         # store the total number of machines (including active and inactive machines)
@@ -32,9 +41,7 @@ class BlockChain:
                 # participate as part of a mining pool
                 self.mining_players['pooled'] += user.machines
 
-    # determine the end-of-day winner
-    def winner(self):
-        # compute the total number of active machines
+        # compute the total number of active machines (turned 'on')
         self.active_machines = 0
         for user_name, n_machines in self.mining_players.items():
             self.active_machines += n_machines
@@ -94,6 +101,9 @@ class BlockChain:
                         for user in self.list_operational_users:
                             if user.name == player_name:
                                 user.sdpa_balance += partial_prize
+                    
+                    # update winners log
+                    self.winners_log[f'Day {current_day}'] = dist_prize
 
                 # distribute prize when solo miner wins
                 else:
