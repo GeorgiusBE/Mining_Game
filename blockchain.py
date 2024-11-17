@@ -19,6 +19,7 @@ class BlockChain:
         '''
         # blank activity log
         self.user_activity_log = {}
+        # store users action
         for user in lst_users:
             self.user_activity_log[user.name] = {f'Day {n}': {f'Action {i}': [] for i in range(1,5)} for n in range(1, self.n_days+1)}
         return self.user_activity_log
@@ -103,6 +104,7 @@ class BlockChain:
 
                     # store the winner's name their prize
                     dist_prize = {}
+
                     # distribute prize to the players in the pool
                     for player_name, n_machines in pooled_players.items():
                         # compute the prize attributable to player
@@ -114,7 +116,10 @@ class BlockChain:
                         # update users' SDPA balance
                         for user in self.list_operational_users:
                             if user.name == player_name:
+                                # update user's SDPA balance 
                                 user.sdpa_balance += partial_prize
+                                # update activity log
+                                self.user_activity_log[user.name][f'Day {current_day}']['Prize'] = partial_prize
                     
                     # update winners log
                     self.winners_log[f'Day {current_day}'] = dist_prize
@@ -127,6 +132,11 @@ class BlockChain:
                             user.sdpa_balance += total_prize
                     # store the winner's name their prize
                     dist_prize = {player_winner:total_prize}
+
+                    # update winners log
+                    self.winners_log[f'Day {current_day}'] = dist_prize
+                    # update activity log
+                    self.user_activity_log[player_name][f'Day {current_day}']['Prize'] = total_prize
 
                 # return the winner and prize 
                 return player_winner, dist_prize
