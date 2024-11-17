@@ -1,3 +1,5 @@
+import math
+
 # UserAccount class
 class UserAccount:
 
@@ -49,11 +51,10 @@ class UserAccount:
         self.user_activity_log[f'Day {self.current_day}']['Action 3'].append(self.machine_status)
 
     # sell SDPA coin
-    def sell_sdpa(self, n_coins, sdpa_price):
+    def sell_sdpa(self, n_coins):
         '''
         Not to be used alone
         n_coins -> number of coins to be sold
-        sdpa_price -> the market price of SDPA coin
         '''
         try:
             # short-selling is not allowed
@@ -63,7 +64,7 @@ class UserAccount:
             self.sdpa_balance -= n_coins
 
             # update capital
-            self.capital += sdpa_price * n_coins
+            self.capital += self.sdpa_price * n_coins
 
             # update activity log
             self.user_activity_log[f'Day {self.current_day}']['Action 2'].append(n_coins)
@@ -104,6 +105,8 @@ class UserAccount:
         '''
         # define current day
         self.current_day = current_day
+        # define SDPA price today
+        self.sdpa_price = sdpa_price
 
         # if choose to buy mining machines
         if action == 1:
@@ -120,14 +123,14 @@ class UserAccount:
                     raise ValueError("Zero SDPA coin balance: Short-selling is not allowed.")
                 
                 # query for the number of coins to be sold
-                sdpa_sold = int(input('Enter the number of SDPA coins to be sold: '))
+                sdpa_sold = round(float(input('Enter the number of SDPA coins to be sold: ')), 2)
 
                 # prevent selling negative quantity of SDPA coins
                 if sdpa_sold < 0:
                     raise ValueError("Invalid quantity: The number of SDPA coins to be sold cannot be negative")
 
                 # update SDPA coin balance and capital
-                self.sell_sdpa(sdpa_sold, sdpa_price)
+                self.sell_sdpa(sdpa_sold)
             
             # print error message
             except ValueError as err:
@@ -175,36 +178,27 @@ class UserAccount:
             return self.total_bill
         else:
             pass
-    
+
     # check for bankruptcy
-    def bankrupt_check(self, sdpa_price):
-        '''
-        sdpa_price -> market price of SDPA coin today
-        '''
+    def bankrupt_check(self):
         # check for negative capital
         if self.capital < 0:
-            # store the number of coins sold
-            sdpa_auto_sale = 0
-            # sell SDPA coin 1 unit at a time until the balance is no longer negative or bankruptcy is declared
-            while True:
-                # check whether the user owns any SDPA coin
-                if self.sdpa_balance > 0:
-                    # sell 1 unit of SDPA coin
-                    self.sell_sdpa(1, sdpa_price)
+            # the required number of coins to be sold to address negative capital
+            sdpa_auto_sale = (self.capital * -1)/self.sdpa_price
+            # round up to 2 decimal places
+            sdpa_auto_sale = math.ceil(sdpa_auto_sale * 100) / 100
 
-                    # update sdpa_auto_sale
-                    sdpa_auto_sale += 1
-                    
-                    # stop selling when balance is positive
-                    if self.capital >= 0:
-                        print(f'{sdpa_auto_sale} SDPA coins belonging to {self.name.capitalize()} were automatically sold to resolve the negative capital balance.')
-                        break    
-                # declare bakrupt
-                else:
-                    # update bankruptcy status
-                    self.bankrupt_status = 'yes'
-                    print(f"{self.name.capitalize()} has declared bankruptcy. All of {self.name.capitalize()}'s ASIC machines will be taken offline.")
-                    break
+            # check whether the user owns enough SDPA coin
+            if sdpa_auto_sale <= self.sdpa_balance:
+                # 
+                self.sell_sdpa(sdpa_auto_sale)
+                print(f'{sdpa_auto_sale} SDPA coins belonging to {self.name.capitalize()} were automatically sold to resolve the negative capital balance.')
+
+            # declare bakruptcy
+            else:
+                # update bankruptcy status
+                self.bankrupt_status = 'yes'
+                print(f"{self.name.capitalize()} has declared bankruptcy. All of {self.name.capitalize()}'s ASIC machines will be taken offline.")
 
         # do nothing when capital is positive
         else:
