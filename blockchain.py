@@ -25,13 +25,15 @@ class BlockChain:
         return self.user_activity_log
     
     # determine the end-of-day winner
-    def winner(self, list_operational_users, current_day):
+    def winner(self, list_operational_users, current_day, base_pooled_mach = 1000, total_prize = 100):
         '''
         list_operational_users -> list of users (in the form of UserAccount class objects) that are operational (not bankrupt).
         current_day -> the current day (int)
+        base_pooled_mach -> the base number of machines in the mining pool
+        total_prize -> the SDPA prize to be awarded to winning player/s during the day 
         '''
         # base number of machines in the pool
-        self.base_pooled_mach = 1000
+        self.base_pooled_mach = base_pooled_mach
         # create an attribute for the list of UserAccount objects
         self.list_operational_users = list_operational_users
 

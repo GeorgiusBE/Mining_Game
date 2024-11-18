@@ -3,14 +3,15 @@ import math
 # UserAccount class
 class UserAccount:
 
-    def __init__(self, name):
+    def __init__(self, name, capital = 50000):
         '''
-        name -> name of the user 
+        name -> name of the user
+        capital -> the starting cash capital for the user
         '''
         # name of the user
         self.name = name
         # intial capital
-        self.capital = 50000
+        self.capital = capital
         # intial number of SDPA coin
         self.sdpa_balance = 0
         # intial number of machines
@@ -212,6 +213,8 @@ class UserAccount:
 
             # declare bakruptcy
             else:
+                # 
+
                 # update bankruptcy status
                 self.bankrupt_status = 'yes'
                 print(f"{self.name.capitalize()} has declared bankruptcy. All of {self.name.capitalize()}'s ASIC machines will be taken offline.")
