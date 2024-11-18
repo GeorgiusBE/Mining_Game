@@ -14,7 +14,10 @@ lst_users = []
 for i in range(n_users):
     # query for user names
     name = input(f'Enter the name of User {i + 1}: ')
-    user = UserAccount(name)
+    # set intial cash capital
+    intial_capital = 50000
+    # create user object
+    user = UserAccount(name, intial_capital)
     lst_users.append(user)
 
 # create Market object
@@ -72,7 +75,9 @@ Enter action number: '''))
             user.action_query(action, sdpa_price_tdy, current_day, user_activity_log)
   
     # determine the day's winners
-    day_winners = sdpa_blockchain.winner(oper_users, current_day)
+    base_pooled_mach = 1000 # base number of machines in mining pool
+    total_prize = 100 # SDPA coins distributed per day
+    day_winners = sdpa_blockchain.winner(oper_users, current_day, base_pooled_mach, total_prize)
     
     # print total number of machines today
     print(f'Total number of ASIC machines: {sdpa_blockchain.total_machines}')
@@ -102,7 +107,8 @@ Enter action number: '''))
         print('No electricity bill.')
     else:
         for user, bill in all_bills.items():
-            print(f'{user.capitalize()} pays {bill} GBP.')
+            if bill:
+                print(f'{user.capitalize()} pays {bill} GBP.')
 
     # check for bankruptcy
     for user in oper_users.copy():
@@ -114,6 +120,90 @@ Enter action number: '''))
     # stop the loop when all users are bankrupt
     if not oper_users:
         break
+
+# total coins mined by everyone during the simulation
+total_prize = total_mined_coins * current_day
+print(total_prize + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+# summarize simulation results
+for user in lst_users:
+    # print user's name
+    print(user.name + ':')
+
+    # for users that declared bankruptcy
+    if user.bankrupt_status == 'yes':
+        # print bankruptcy status
+        print(f'- {user.name} went bankrupt on day [ENTER DAY!!!!!!!!!!!!!]') #################################
+    
+    # for users that remian oprational
+    else:
+        # print final (cash) capital balance
+        print(f'- Cash capital balance = {user.capital}')
+
+        # print final SDPA coin balance
+        print(f'- SDPA coin balance = {user.sdpa_balance}')
+        
+        # print dollar value of final SDPA coin balance
+        dollar_sdpa_balance = user.sdpa_balance * sdpa_price_tdy
+        print(f'- GBP value of SDPA coin balance = {dollar_sdpa_balance}')
+        
+        # print final number of ASIC machines owned
+        print(f'- ASIC machines count = {user.machines}')
+        
+        # print total GBP value of all assets (assuming the machines' value do not depreciate)
+        machine_price = 600 # Price for 1 unit of ASIC machine
+        total_assets = user.capital + dollar_sdpa_balance + user.machines * machine_price
+        print(f'- Total GBP value of all assets = {total_assets}')
+
+        # print investment return
+        init_capital = 50000 # Initial cash capital balance per user
+        int_ret_gbp = total_assets - init_capital # GBP investment return
+        print(f'- Investment return (GBP) = {round(int_ret_gbp, 2)} GBP')
+        inv_ret_pct = (int_ret_gbp)/init_capital * 100 # % investment return
+        print(f'- Investment return (%) = {round(inv_ret_pct, 2)}%')
+
+        # total number of coins mined by the user
+        user_mined_coins = 0
+        for day, winners in sdpa_blockchain.winners_log.items():
+            for winner_name, coins in winners.items():
+                if winner_name == user.name:
+                    user_mined_coins += coins
+        # print total number of coins mined by the user
+        print(f'- Total coins mined = {user_mined_coins} coins')
+
+        # print mining performance
+        mine_performance = user_mined_coins/total_prize * 100
+        print(f'- Mining performance (%) = {mine_performance}%')
+
+        # print event summary
+        for day, actions in user_activity_log[user.name].items():
+            # print the day
+            print(day + ':')
+            
+            for action, param in actions.items():
+                # skip the action that was not performed
+                if not param:
+                    continue
+                # print the total number of machines purchased
+                elif action == 'Action 1':
+                    print(f'- Purchased {sum(param)} ASIC machines.')
+                # print the total number of SDPA coin sold
+                elif action == 'Action 2':
+                    print(f'- Sold {sum(param)} SDPA coins.')
+                # print the change in machine status [on/off]
+                elif action == 'Action 3':
+                    print(f'- ASIC machines are turned {param[-1]}.')
+                # print the change in mining type
+                elif action == 'Action 4':
+                    print(f'- Changed mining type to {param[-1]}.')
+                # print the prize distributed
+                elif action == 'Prize':
+                    print(f'- Received {param} SDPA coins from mining activity.')
+                # print elecrticity bill paid
+                elif action == 'Electricity':
+                    print(f'- Paid {param} GBP on electricity bill.')
+                
+
 
 # print the user activity log
 print(user_activity_log)
