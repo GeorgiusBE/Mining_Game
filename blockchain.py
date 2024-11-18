@@ -8,8 +8,13 @@ class BlockChain:
         '''
         # store the number of days in the simulation
         self.n_days = n_days
-        # template for winners log
-        self.winners_log = {f'Day {n}' : {} for n in range(1, n_days+1)}
+
+    # The 3 functions below are going to be combined togehter!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # create winners log 
+    def create_winners_log(self, lst_users):
+        # blank winners log
+        self.winners_log = {f'Day {n}' : {} for n in range(1, self.n_days+1)}
+        return self.winners_log
 
    # create activity log
     def create_user_activity_log(self, lst_users):
@@ -19,11 +24,16 @@ class BlockChain:
         '''
         # blank activity log
         self.user_activity_log = {}
-        # store users action
         for user in lst_users:
             self.user_activity_log[user.name] = {f'Day {n}': {f'Action {i}': [] for i in range(1,5)} for n in range(1, self.n_days+1)}
         return self.user_activity_log
     
+    # create electricity bill log
+    def create_user_electricity_log(self, lst_users):
+        # blank winners log
+        self.electricity_log = {f'Day {n}' : {} for n in range(1, self.n_days+1)}
+        return self.electricity_log
+
     # determine the end-of-day winner
     def winner(self, list_operational_users, current_day, base_pooled_mach = 1000, total_prize = 100):
         '''
@@ -104,16 +114,13 @@ class BlockChain:
                             if user.mining_type == 'pooled' and user.machine_status == 'on':
                                 pooled_players[user.name] = user.machines
 
-                    # store the winner's name their prize
-                    dist_prize = {}
-
                     # distribute prize to the players in the pool
                     for player_name, n_machines in pooled_players.items():
                         # compute the prize attributable to player
                         partial_prize = n_machines/self.mining_players['pooled'] * total_prize
-                        
-                        # update dist_prize
-                        dist_prize[player_name] = partial_prize
+
+                        # update winners log
+                        self.winners_log[f'Day {current_day}'][player_name] = partial_prize
 
                         # update users' SDPA balance
                         for user in self.list_operational_users:
@@ -122,9 +129,6 @@ class BlockChain:
                                 user.sdpa_balance += partial_prize
                                 # update activity log
                                 self.user_activity_log[user.name][f'Day {current_day}']['Prize'] = partial_prize
-                    
-                    # update winners log
-                    self.winners_log[f'Day {current_day}'] = dist_prize
 
                 # distribute prize when solo miner wins
                 else:
@@ -132,16 +136,15 @@ class BlockChain:
                     for user in self.list_operational_users:
                         if user.name == player_winner:
                             user.sdpa_balance += total_prize
-                    # store the winner's name their prize
-                    dist_prize = {player_winner:total_prize}
 
                     # update winners log
-                    self.winners_log[f'Day {current_day}'] = dist_prize
+                    self.winners_log[f'Day {current_day}'][player_winner] = total_prize
+
                     # update activity log
                     self.user_activity_log[player_name][f'Day {current_day}']['Prize'] = total_prize
 
-                # return the winner and prize 
-                return player_winner, dist_prize
+                # return the winner and prize
+                return player_winner
             
             else:
                 # update prev_cum_prop

@@ -67,7 +67,7 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
 
         # total number of coins mined by the user
         user_mined_coins = 0
-        for day, winners in sdpa_blockchain.winners_log.items():
+        for day, winners in winners_log.items():
             for winner_name, coins in winners.items():
                 if winner_name == user.name:
                     user_mined_coins += coins
@@ -81,6 +81,12 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
         # print actions summary
         print('- Key actions performed,')
         print_actions(user_activity_log, user.name, action_messages)
+
+
+
+#################################################################################################################
+
+
 
 # query for number of days
 n_days = int(input('Enter number of days in the simulation: '))
@@ -105,8 +111,12 @@ for i in range(n_users):
 market = Market()
 # create BlockChain object
 sdpa_blockchain = BlockChain(n_days)
+# create winners log
+winners_log = sdpa_blockchain.create_winners_log(lst_users)
 # create user activity log
 user_activity_log = sdpa_blockchain.create_user_activity_log(lst_users)
+# create user electricity bill log
+user_electricity_log = sdpa_blockchain.create_user_electricity_log(lst_users)
 
 # list of operational (non-bankrupt) users
 oper_users = lst_users
@@ -164,32 +174,26 @@ Enter action number: '''))
     print(f'Total number of ASIC machines: {sdpa_blockchain.total_machines}')
 
     # print end-of-day winner/s and the prize distributed
-    print(f'{day_winners[0].capitalize()} wins PoW mining.')
-    
-    # distribute prize to the winner/s
-    print('Prize distribution:')
-    if not day_winners[1]: # if there is no winner (i.e. the pool wins with no players in the pool)
-        print('No SDPA coins were distributed to users.')
-    else: # if there is a winning player/s
-        for player, prize in day_winners[1].items():
-            # print the distributed prize)
-            print(f'{player.capitalize()} receives {prize} SDPA coins.')
+    print(f'{day_winners.capitalize()} wins PoW mining.')
 
-    # electricity bill record
-    all_bills = {}
-    # record electricity bill
-    for user in oper_users:
-        # update electricity bill record
-        all_bills[user.name] = user.electricity_bill(elec_price_tdy, current_day)
+    # print the winner/s and the prize they receive
+    print('Prize distribution:')
+    if winners_log[f'Day {current_day}']: # when there is a winner/s
+        for winner, prize in winners_log[f'Day {current_day}'].items():
+            print(f'{winner.capitalize()} receives {prize} SDPA coins.')
+    else: # when there is no winner (i.e. the pool wins with no players in the pool)
+        print('No SDPA coins were distributed to users.')
+
+    # electricity bill payment
+    user.electricity_bill(elec_price_tdy, current_day, user_electricity_log)
 
     # print electricity bill
     print('Electricity bill:')
-    if all([value is None for value in all_bills.values()]): # when no 
+    if user_electricity_log [f'Day {current_day}']: #when there are users who are paying for electricity during the day
+        for player, bill in user_electricity_log [f'Day {current_day}'].items():
+            print(f'{player.capitalize()} pays {bill} GBP.')
+    else: # when there are no users who are paying electricity during the day
         print('No electricity bill.')
-    else:
-        for user, bill in all_bills.items():
-            if bill:
-                print(f'{user.capitalize()} pays {bill} GBP.')
 
     # check for bankruptcy
     for user in oper_users.copy():
@@ -225,4 +229,7 @@ for user in lst_users:
 print(user_activity_log)
 
 # print the log of the distributed prize
-print(sdpa_blockchain.winners_log)
+print(winners_log)
+
+# print the electrivcity bill log
+print(user_electricity_log)

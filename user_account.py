@@ -167,13 +167,14 @@ class UserAccount:
                 print(err)
     
     # charging electricity bill    
-    def electricity_bill(self, electricity_unit_price, current_day):
+    def electricity_bill(self, electricity_unit_price, current_day, electricity_log):
         '''
         electricity_unit_price -> the price for 1 unit of electricity (use the electricity price generated from Market class)
         current_day -> current day (Note that this is purposefully redefined, and not using the current_day
                        defined in the action_query method. This is because when action 5 is chosen, action_query
                        does not get called, and thus the self.current day does not get updated. -> refer to the
                        "if action == 5: break" line of code in the main.py file.)
+        electricity_log -> (dict) a log that stores user's electricity bill; created from BlockChain class's method called create_user_activity_log 
         '''
         # only charge electricity bill when the machines are on
         if self.machine_status == 'on':
@@ -181,9 +182,10 @@ class UserAccount:
             self.total_bill = self.machines * electricity_unit_price
             # update user's capital
             self.capital -= self.total_bill
+            # update electricity bill log
+            electricity_log[f'Day {current_day}'][self.name] = self.total_bill
             # update activity log
             self.user_activity_log[self.name][f'Day {current_day}']['Electricity'] = self.total_bill
-            return self.total_bill
         else:
             pass
 
