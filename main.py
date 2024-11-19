@@ -48,6 +48,10 @@ def print_actions(user_activity_log, user_name, action_messages):
         # print message when no actions are performed on the day
         if not action_indicator:
             print('    - No actions performed today.')
+        
+        # break the loop once the user went bankrupt
+        if actions.get('Bankrupt', None) == 'yes':
+            break
 
 # a function to compute the total value in a log
 def compute_total(log, user_name):
@@ -72,16 +76,17 @@ def compute_total(log, user_name):
     return total
 
 # function to print user's summary
-def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_log, winners_log, user_electricity_log, action_messages, machine_price=600):
+def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_log, winners_log, user_electricity_log, bankruptcy_log, action_messages, machine_price=600):
     '''
     user -> UserAccount object representing a user
     sdpa_price_tdy -> today's SDPA coin price
     total_mined_coins -> total coin mined by all users and the pool throughout the whole simulation
-    machine_price -> the price for 1 unit of machine
     user_activity_log -> (dict) activity log that records all events for all users; created in the BlockChain class
     winners_log -> (dict) a log that records the distribution of prizes to the winners; created in the BlockChain class
     user_electricity_log -> (dict) a log that records users' electricity bill payment; created in the BlockChain class
+    bankruptcy_log -> (dict) a log that records when users went bankrupt; created in the BlockChain class
     action_messages -> (dict) key-value pair is represented by the action name and the corresponsing message
+    machine_price -> the price for 1 unit of machine
     '''
     # print user's name
     print(user.name.capitalize() + ':')
@@ -89,8 +94,27 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
     # for users that declared bankruptcy
     if user.bankrupt_status == 'yes':
         # print bankruptcy status
-        print(f'- {user.name} went bankrupt on day [ENTER DAY!!!!!!!!!!!!!]') #################################
-    
+        print(f'- {user.name.capitalize()} went bankrupt on day {bankruptcy_log[user.name]}')
+
+        # print final number of ASIC machines owned
+        print(f'- ASIC machines count = {user.machines}')
+
+        # total number of coins mined by the user
+        user_mined_coins = compute_total(winners_log, user.name)
+        print(f'- Total coins mined = {user_mined_coins} coins')
+
+        # print mining performance
+        mine_performance = user_mined_coins/total_mined_coins * 100
+        print(f'- Mining performance (%) = {mine_performance}%')
+
+        # total electricity bill
+        user_total_bill = compute_total(user_electricity_log, user.name)
+        print(f'- Total electricity bill = {user_total_bill} GBP.')
+
+        # print actions summary
+        print('- Key actions performed,')
+        print_actions(user_activity_log, user.name, action_messages)
+
     # for users that remian oprational
     else:
         # print final (cash) capital balance
@@ -111,11 +135,12 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
         print(f'- Total GBP value of all assets = {total_assets}')
 
         # print investment return
-        int_ret_gbp = total_assets - initial_capital # GBP investment return
+            # GBP investment return
+        int_ret_gbp = total_assets - initial_capital
         print(f'- Investment return (GBP) = {round(int_ret_gbp, 2)} GBP')
-        inv_ret_pct = (int_ret_gbp)/initial_capital * 100 # % investment return
+            # % investment return
+        inv_ret_pct = (int_ret_gbp)/initial_capital * 100
         print(f'- Investment return (%) = {round(inv_ret_pct, 2)}%')
-
 
         # total number of coins mined by the user
         user_mined_coins = compute_total(winners_log, user.name)
@@ -128,7 +153,6 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
         # total electricity bill
         user_total_bill = compute_total(user_electricity_log, user.name)
         print(f'- Total electricity bill = {user_total_bill} GBP.')
-
 
         # print actions summary
         print('- Key actions performed,')
@@ -162,10 +186,10 @@ market = Market()
 # create BlockChain object
 sdpa_blockchain = BlockChain(n_days)
 # create winners log, user activity log, and user electricity bill log
-winners_log, user_electricity_log, user_activity_log = sdpa_blockchain.create_logs(lst_users)
+winners_log, user_electricity_log, user_activity_log, bankruptcy_log = sdpa_blockchain.create_logs(lst_users)
 
 # list of operational (non-bankrupt) users
-oper_users = lst_users
+oper_users = lst_users.copy()
 
 # iterate through each day
 for i in range(n_days):
@@ -210,7 +234,10 @@ Enter action number: '''))
             
             # perform the specified action
             user.action_query(action, sdpa_price_tdy, current_day, user_activity_log)
-  
+    
+        # electricity bill payment
+        user.electricity_bill(elec_price_tdy, current_day, user_electricity_log)
+
     # determine the day's winners
     base_pooled_mach = 1000 # base number of machines in mining pool
     total_prize = 100 # SDPA coins distributed per day
@@ -229,9 +256,6 @@ Enter action number: '''))
                              '{user_name} receives {param} SDPA coins.',
                              'No SDPA coins were distributed to users.')
 
-    # electricity bill payment
-    user.electricity_bill(elec_price_tdy, current_day, user_electricity_log)
-
     # print electricity bill
     print_elec_prize_summary('Electricity bill:',
                              user_electricity_log,
@@ -241,7 +265,7 @@ Enter action number: '''))
 
     # check for bankruptcy
     for user in oper_users.copy():
-        user.bankrupt_check(current_day)
+        user.bankrupt_check(current_day, bankruptcy_log)
         # remove bankrupt users from list of operational users
         if user.bankrupt_status == 'yes':
             oper_users.remove(user)
@@ -260,7 +284,8 @@ action_messages = {
     'Action 3': lambda param: f'    - ASIC machines are turned {param[-1]}.' if param else None,
     'Action 4': lambda param: f'    - Changed mining type to {param[-1]}.' if param else None,
     'Prize': lambda param: f'    - Received {param} SDPA coins from mining activity.' if param else None,
-    'Electricity': lambda param: f'    - Paid {param} GBP on electricity bill.' if param else None
+    'Electricity': lambda param: f'    - Paid {param} GBP on electricity bill.' if param else None,
+    'Bankrupt': lambda param: f'    - Went bankrupt'
 }
 
 # print out the simulation summary result
@@ -271,6 +296,7 @@ for user in lst_users:
                        user_activity_log,
                        winners_log,
                        user_electricity_log,
+                       bankruptcy_log,
                        action_messages,
                        600)
 

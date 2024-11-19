@@ -190,7 +190,7 @@ class UserAccount:
             pass
 
     # check for bankruptcy
-    def bankrupt_check(self, current_day):
+    def bankrupt_check(self, current_day, bankruptcy_log):
         '''
         current_day -> current day (Note that this is purposefully redefined, and not using the current_day
                        defined in the action_query method. This is because when action 5 is chosen, action_query
@@ -215,7 +215,8 @@ class UserAccount:
 
             # declare bakruptcy
             else:
-                # 
+                # update bankruptcy log
+                bankruptcy_log[self.name] = current_day
 
                 # update bankruptcy status
                 self.bankrupt_status = 'yes'
