@@ -11,12 +11,6 @@ class BlockChain:
 
     # create logs
     def create_logs(self, lst_users):
-        # create winners log template
-        self.winners_log = {f'Day {n}' : {} for n in range(1, self.n_days+1)}
-        
-        # create electricity bill log template
-        self.electricity_log = {f'Day {n}' : {} for n in range(1, self.n_days+1)}
-        
         # create activity log
         self.user_activity_log = {}
         for user in lst_users:
@@ -25,7 +19,7 @@ class BlockChain:
         # create bankruptcy log
         self.bankruptcy_log = {}
 
-        return self.winners_log, self.electricity_log, self.user_activity_log, self.bankruptcy_log
+        return self.user_activity_log, self.bankruptcy_log
 
     # determine the end-of-day winner
     def winner(self, list_operational_users, current_day, base_pooled_mach = 1000, total_prize = 100):
@@ -112,9 +106,6 @@ class BlockChain:
                         # compute the prize attributable to player
                         partial_prize = n_machines/self.mining_players['pooled'] * total_prize
 
-                        # update winners log
-                        self.winners_log[f'Day {current_day}'][player_name] = partial_prize
-
                         # update users' SDPA balance
                         for user in self.list_operational_users:
                             if user.name == player_name:
@@ -129,9 +120,6 @@ class BlockChain:
                     for user in self.list_operational_users:
                         if user.name == player_winner:
                             user.sdpa_balance += total_prize
-
-                    # update winners log
-                    self.winners_log[f'Day {current_day}'][player_winner] = total_prize
 
                     # update activity log
                     self.user_activity_log[player_name][f'Day {current_day}']['Prize'] = total_prize
