@@ -4,7 +4,7 @@ from market import Market
 from user_account import UserAccount
 from blockchain import BlockChain
 
-# a function to print the summary of a log (specifically made for prize distribution and electricity bill)
+# a function to print the summary of a log (specifically made for prize distribution log and electricity bill log)
 def print_elec_prize_summary(action_name, log, current_day, positive_message_template, negative_message_template):
     '''
     Prints the summary of a log (e.g., winners or electricity bills) for a specific day.
@@ -49,14 +49,38 @@ def print_actions(user_activity_log, user_name, action_messages):
         if not action_indicator:
             print('    - No actions performed today.')
 
+# a function to compute the total value in a log
+def compute_total(log, user_name):
+    '''
+    Calculate the total value associated with a specific user from a nested dictionary log.
+
+    Args:
+        log (dict): The nested dictionary log (e.g., winners_log or user_electricity_log).
+        user_name (str): The name of the user to calculate the total for.
+
+    Returns:
+        int or float: The total value for the specified user.
+    '''
+    # store total value
+    total = 0
+    # search for the specified user in the log
+    for day, users in log.items():
+        for name, value in users.items():
+            if name == user_name:
+                # update the total
+                total += value
+    return total
+
 # function to print user's summary
-def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_log, action_messages, machine_price=600):
+def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_log, winners_log, user_electricity_log, action_messages, machine_price=600):
     '''
     user -> UserAccount object representing a user
     sdpa_price_tdy -> today's SDPA coin price
     total_mined_coins -> total coin mined by all users and the pool throughout the whole simulation
     machine_price -> the price for 1 unit of machine
     user_activity_log -> (dict) activity log that records all events for all users; created in the BlockChain class
+    winners_log -> (dict) a log that records the distribution of prizes to the winners; created in the BlockChain class
+    user_electricity_log -> (dict) a log that records users' electricity bill payment; created in the BlockChain class
     action_messages -> (dict) key-value pair is represented by the action name and the corresponsing message
     '''
     # print user's name
@@ -92,12 +116,14 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
         inv_ret_pct = (int_ret_gbp)/initial_capital * 100 # % investment return
         print(f'- Investment return (%) = {round(inv_ret_pct, 2)}%')
 
+
         # total number of coins mined by the user
-        user_mined_coins = 0
-        for day, winners in winners_log.items():
-            for winner_name, coins in winners.items():
-                if winner_name == user.name:
-                    user_mined_coins += coins
+        user_mined_coins = compute_total(winners_log, user.name)
+        # user_mined_coins = 0
+        # for day, winners in winners_log.items():
+        #     for winner_name, coins in winners.items():
+        #         if winner_name == user.name:
+        #             user_mined_coins += coins
         # print total number of coins mined by the user
         print(f'- Total coins mined = {user_mined_coins} coins')
 
@@ -105,11 +131,20 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
         mine_performance = user_mined_coins/total_mined_coins * 100
         print(f'- Mining performance (%) = {mine_performance}%')
 
+        # total electricity bill
+        user_total_bill = compute_total(user_electricity_log, user.name)
+        # user_total_bill = 0
+        # for day, users in user_electricity_log.items():
+        #     for user_name, bill  in users.items():
+        #         if user_name == user.name:
+        #             user_total_bill += bill
+        # print total electricity bill
+        print(f'- Total electricity bill = {user_total_bill} GBP.')
+
+
         # print actions summary
         print('- Key actions performed,')
         print_actions(user_activity_log, user.name, action_messages)
-
-
 
 #################################################################################################################
 
@@ -242,7 +277,14 @@ action_messages = {
 
 # print out the simulation summary result
 for user in lst_users:
-    print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_log, action_messages, machine_price=600)
+    print_user_summary(user,
+                       sdpa_price_tdy,
+                       total_mined_coins,
+                       user_activity_log,
+                       winners_log,
+                       user_electricity_log,
+                       action_messages,
+                       600)
 
 
 
