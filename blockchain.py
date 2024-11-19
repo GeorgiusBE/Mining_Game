@@ -9,30 +9,47 @@ class BlockChain:
         # store the number of days in the simulation
         self.n_days = n_days
 
-    # The 3 functions below are going to be combined togehter!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # create winners log 
-    def create_winners_log(self, lst_users):
-        # blank winners log
+    # create logs
+    def create_logs(self, lst_users):
+        # create winners log template
         self.winners_log = {f'Day {n}' : {} for n in range(1, self.n_days+1)}
-        return self.winners_log
-
-   # create activity log
-    def create_user_activity_log(self, lst_users):
-        '''
-        n_days -> total number of days
-        lst_users -> list of UserAccount objects
-        '''
-        # blank activity log
+        
+        # create electricity bill log template
+        self.electricity_log = {f'Day {n}' : {} for n in range(1, self.n_days+1)}
+        
+        # create activity log
         self.user_activity_log = {}
         for user in lst_users:
             self.user_activity_log[user.name] = {f'Day {n}': {f'Action {i}': [] for i in range(1,5)} for n in range(1, self.n_days+1)}
-        return self.user_activity_log
+        
+        return self.winners_log, self.electricity_log, self.user_activity_log
+
+
+    ################################################################################################3
+#     # create winners log 
+#     def create_winners_log(self, lst_users):
+#         # blank winners log
+#         self.winners_log = {f'Day {n}' : {} for n in range(1, self.n_days+1)}
+#         return self.winners_log
+
+#    # create activity log
+#     def create_user_activity_log(self, lst_users):
+#         '''
+#         n_days -> total number of days
+#         lst_users -> list of UserAccount objects
+#         '''
+#         # blank activity log
+#         self.user_activity_log = {}
+#         for user in lst_users:
+#             self.user_activity_log[user.name] = {f'Day {n}': {f'Action {i}': [] for i in range(1,5)} for n in range(1, self.n_days+1)}
+#         return self.user_activity_log
     
-    # create electricity bill log
-    def create_user_electricity_log(self, lst_users):
-        # blank winners log
-        self.electricity_log = {f'Day {n}' : {} for n in range(1, self.n_days+1)}
-        return self.electricity_log
+#     # create electricity bill log
+#     def create_user_electricity_log(self, lst_users):
+#         # blank electricity bill log
+#         self.electricity_log = {f'Day {n}' : {} for n in range(1, self.n_days+1)}
+#         return self.electricity_log
+    ################################################################################################
 
     # determine the end-of-day winner
     def winner(self, list_operational_users, current_day, base_pooled_mach = 1000, total_prize = 100):

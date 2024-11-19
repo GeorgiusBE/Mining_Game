@@ -138,12 +138,8 @@ for i in range(n_users):
 market = Market()
 # create BlockChain object
 sdpa_blockchain = BlockChain(n_days)
-# create winners log
-winners_log = sdpa_blockchain.create_winners_log(lst_users)
-# create user activity log
-user_activity_log = sdpa_blockchain.create_user_activity_log(lst_users)
-# create user electricity bill log
-user_electricity_log = sdpa_blockchain.create_user_electricity_log(lst_users)
+# create winners log, user activity log, and user electricity bill log
+winners_log, user_electricity_log, user_activity_log = sdpa_blockchain.create_logs(lst_users)
 
 # list of operational (non-bankrupt) users
 oper_users = lst_users
