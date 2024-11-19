@@ -4,6 +4,24 @@ from market import Market
 from user_account import UserAccount
 from blockchain import BlockChain
 
+# a function to print the summary of a log (specifically made for prize distribution and electricity bill)
+def print_elec_prize_summary(action_name, log, current_day, positive_message_template, negative_message_template):
+    '''
+    Prints the summary of a log (e.g., winners or electricity bills) for a specific day.
+
+    action_name -> (str) The name of the action being logged (e.g., 'Prize distribution', 'Electricity bill').
+    log -> (dict) a log with the same data structure as what was created in BlockChain class' winners_log or electricity_log
+    current_day -> (int) the current day for which to print the summary 
+    positive_message_template -> (str) A template message for the user_name-param pair in the log (e.g., "{user_name} receives {param} SDPA coins.").
+    negative_message_template -> Message to print if no relevant activity is recorded in the log
+    '''
+    print(action_name)
+    if log[f'Day {current_day}']:  # if there are entries for the day
+        for user_name, param in log[f'Day {current_day}'].items():
+            print(positive_message_template.format(user_name=user_name.capitalize(), param=param))
+    else:  # if no entries are present
+        print(negative_message_template)
+
 # function to print out key actions taken in the simulation
 def print_actions(user_activity_log, user_name, action_messages):
     '''
@@ -14,6 +32,10 @@ def print_actions(user_activity_log, user_name, action_messages):
     for day, actions in user_activity_log[user_name].items():
         # print the day
         print(f'    {day}:')
+
+        # track wheter any action is perfomed on the day
+        action_indicator = False
+
         # iterate through the actions and parameters
         for action, param in actions.items():
             # get the message from action_messages
@@ -21,6 +43,11 @@ def print_actions(user_activity_log, user_name, action_messages):
             # only print when the action was performed
             if message:
                 print(message)
+                action_indicator = True # update the indicator when action/s are performed on the day
+        
+        # print message when no actions are performed on the day
+        if not action_indicator:
+            print('    - No actions performed today.')
 
 # function to print user's summary
 def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_log, action_messages, machine_price=600):
@@ -175,25 +202,23 @@ Enter action number: '''))
 
     # print end-of-day winner/s and the prize distributed
     print(f'{day_winners.capitalize()} wins PoW mining.')
-
+    
     # print the winner/s and the prize they receive
-    print('Prize distribution:')
-    if winners_log[f'Day {current_day}']: # when there is a winner/s
-        for winner, prize in winners_log[f'Day {current_day}'].items():
-            print(f'{winner.capitalize()} receives {prize} SDPA coins.')
-    else: # when there is no winner (i.e. the pool wins with no players in the pool)
-        print('No SDPA coins were distributed to users.')
+    print_elec_prize_summary('Prize distribution:',
+                             winners_log,
+                             current_day,
+                             '{user_name} receives {param} SDPA coins.',
+                             'No SDPA coins were distributed to users.')
 
     # electricity bill payment
     user.electricity_bill(elec_price_tdy, current_day, user_electricity_log)
 
     # print electricity bill
-    print('Electricity bill:')
-    if user_electricity_log [f'Day {current_day}']: #when there are users who are paying for electricity during the day
-        for player, bill in user_electricity_log [f'Day {current_day}'].items():
-            print(f'{player.capitalize()} pays {bill} GBP.')
-    else: # when there are no users who are paying electricity during the day
-        print('No electricity bill.')
+    print_elec_prize_summary('Electricity bill:',
+                             user_electricity_log,
+                             current_day,
+                             '{user_name} pays {param} GBP.',
+                             'No electricity bill.')
 
     # check for bankruptcy
     for user in oper_users.copy():
