@@ -119,12 +119,6 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
 
         # total number of coins mined by the user
         user_mined_coins = compute_total(winners_log, user.name)
-        # user_mined_coins = 0
-        # for day, winners in winners_log.items():
-        #     for winner_name, coins in winners.items():
-        #         if winner_name == user.name:
-        #             user_mined_coins += coins
-        # print total number of coins mined by the user
         print(f'- Total coins mined = {user_mined_coins} coins')
 
         # print mining performance
@@ -133,12 +127,6 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
 
         # total electricity bill
         user_total_bill = compute_total(user_electricity_log, user.name)
-        # user_total_bill = 0
-        # for day, users in user_electricity_log.items():
-        #     for user_name, bill  in users.items():
-        #         if user_name == user.name:
-        #             user_total_bill += bill
-        # print total electricity bill
         print(f'- Total electricity bill = {user_total_bill} GBP.')
 
 
