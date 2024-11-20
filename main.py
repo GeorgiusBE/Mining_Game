@@ -3,6 +3,7 @@ from market import Market
 from user_account import UserAccount
 from blockchain import BlockChain
 
+# a function to compute and print daily summary results
 def daily_summary(user_activity_log, oper_users, sdpa_price_tdy, current_day, machine_price=600):
     '''
     Compute daily paper profit and daily net spending
@@ -177,6 +178,8 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
         print('- Key actions performed,')
         print_actions(user_activity_log, user.name, action_messages)
 
+##################################################################################################################
+
 # query for number of days
 n_days = int(input('Enter number of days in the simulation: '))
 # query for number of users
@@ -211,6 +214,7 @@ for i in range(n_days):
     current_day = i + 1
     print(f'''Trading Day {current_day}
 ------------- ''')
+    
     # print SDPA price for the day
     if i == 0:
         # SDPA price is initially 50 GBP
@@ -227,6 +231,9 @@ for i in range(n_days):
 
     # iterate through each defined users
     for user in oper_users:
+        # resets the tracker for daily machine purchases
+        user.reset_daily_machine_purchases()
+
         # prompt the user with the query until action 5 is chosen
         while True:
             # print user status when machines owned is not zero
@@ -235,14 +242,25 @@ for i in range(n_days):
             # print user status when user owns zero machine
             else:
                 print(f'{user.name}\'s current balance = {user.capital} GBP; number of SDPA coins = {user.sdpa_balance}; number of ASIC = {user.machines}.')
+            
             # query the user with list of actions
-            action = int(input('''Select which action to make,
+            action = input('''Select which action to make,
 1. Purchase mining machines
 2. Sell SDPA coins
 3. Switch ASIC on/off
 4. Switch solo/pooled mining
 5. End action
-Enter action number: '''))
+Enter action number: ''')
+
+            try:
+                # raise error if the input 
+                if action not in ['1','2','3','4','5']:
+                    raise ValueError('Invalid input: To select the action, please enter 1, 2, 3, 4, or 5.')
+                # convert the input into integer
+                action = int(action)
+            except ValueError as err:
+                print(err)
+            
             # break the loop if the user chooses to end action
             if action == 5:
                 break

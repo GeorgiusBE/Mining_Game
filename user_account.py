@@ -6,7 +6,7 @@ class UserAccount:
     def __init__(self, name, capital = 50000):
         '''
         name -> name of the user
-        capital -> the starting cash capital for the user
+        capital -> the starting cash capital fo0r the user
         '''
         # name of the user
         self.name = name
@@ -24,30 +24,43 @@ class UserAccount:
             # 'yes' to indicate bankruptcy, otherwise 'no'
         self.bankrupt_status = 'no'
     
+    def reset_daily_machine_purchases(self):
+        '''
+        Resets the object that tracks the number of machines purchased per day.
+        '''
+        self.day_machines = 0
+    
     # purchase new machines
-    def buy_machines(self, n_machines):
+    def buy_machines(self, n_machines, machine_price = 600):
         '''
         Not to be used alone
         n_machines -> number of machines to be purchased
+        machine_price -> price for 1 unit of ASIC machine
         '''
-        # store the number of machines purchased
-        self.n_machines = n_machines
-        # update total number of machines owned
-        self.machines += n_machines
-        # update capital
-        self.capital -= 600 * n_machines
+        print(self.day_machines)
+        try:
+            # ensure that the number of machines purchased per day does not exceed 10
+            if self.day_machines + n_machines > 10:
+                raise ValueError('Invalid quantitiy: 10 is the daily limit on the purchase of ASIC machines. {self.day_machines} units has been purchased today.')
 
-    # switch the machines on/off
-    def machine_swith(self):
-        '''
-        Not to be used alone
-        '''
-        # turn off the machines if the machines are currently on
-        if self.machine_status == 'on':
-            self.machine_status = 'off'
-        # turn on the machines if the machines are currently off
-        elif self.machine_status == 'off':
-            self.machine_status = 'on'
+            # compute total cost
+            total_cost = machine_price * n_machines
+            
+            # ensure that the user has sufficient capital to purchase the machines
+            if total_cost > self.capital:
+                raise ValueError(f'invalid quantity: Insufficient capital to purchase {n_machines} units of ASIC machines.')
+            
+            # store the number of machines purchased
+            self.n_machines = n_machines
+            # update daily purchase tracker
+            self.day_machines += n_machines
+            # update total number of machines owned
+            self.machines += n_machines
+            # update capital
+            self.capital -= total_cost
+
+        except ValueError as err:
+            print(err)
 
     # sell SDPA coin
     def sell_sdpa(self, n_coins):
@@ -59,9 +72,13 @@ class UserAccount:
         self.n_coins = n_coins
 
         try:
-            # short-selling is not allowed
+            # prevent short-selling
             if n_coins > self.sdpa_balance:
                 raise ValueError("Insufficient balance: Cannot sell more SDPA coins than currently owned. Short-selling is not allowed.")
+            # prevent selling negative quantity of SDPA coins
+            if n_coins < 0:
+                raise ValueError("Invalid quantity: The number of SDPA coins to be sold cannot be negative")
+
             # update SDPA coin balance
             self.sdpa_balance -= n_coins
 
@@ -72,17 +89,47 @@ class UserAccount:
         except ValueError as err:
             print(err)
 
+    # switch the machines on/off
+    def machine_swith(self):
+        '''
+        Not to be used alone
+        '''
+        try:
+            # prevent changes to machine status if the user owns 0 machines
+            if self.machines == 0:
+                raise ValueError("No machines owned: Cannot switch machine status without owning any machines.")
+            
+            # turn off the machines if the machines are currently on
+            if self.machine_status == 'on':
+                self.machine_status = 'off'
+            # turn on the machines if the machines are currently off
+            elif self.machine_status == 'off':
+                self.machine_status = 'on'
+
+        # print error message
+        except ValueError as err:
+            print(err)
+
     # switch mining type (solo/pooled)
     def change_mining_type(self):
         '''
         Not to be used alone
         '''
-        # change mining type to pooled if current mining type is solo
-        if self.mining_type == 'solo':
-            self.mining_type = 'pooled'
-        # change mining type to solo if current mining type is pooled
-        elif self.mining_type == 'pooled':
-            self.mining_type = 'solo'
+        try:
+            # prevent changes to mining type if the user owns 0 machines
+            if self.machines == 0:
+                raise ValueError("No machines owned: Cannot switch mining type without owning any machines.")
+
+             # change mining type to pooled if current mining type is solo
+            if self.mining_type == 'solo':
+                self.mining_type = 'pooled'
+            # change mining type to solo if current mining type is pooled
+            elif self.mining_type == 'pooled':
+                self.mining_type = 'solo'
+
+        # print error message
+        except ValueError as err:
+            print(err)
 
     # query user to pick an action
     def action_query(self, action, sdpa_price, current_day, user_activity_log):
@@ -91,6 +138,7 @@ class UserAccount:
         sdpa_price -> the market price of the SDPA coin
         current_day -> the current day (int)
         user_activity_log -> a blank template to record users' activity log. It should have the data structure of ...
+        day_machines -> the number of machines that has been purchased in the same day
         '''
         # set the current day
         self.current_day = current_day
@@ -101,70 +149,57 @@ class UserAccount:
 
         # if choose to buy mining machines
         if action == 1:
-            # query for the number of machines to purchase
-            n_machines = int(input('Enter number of ASIC machines to buy: '))
-            # update total machines owned and capital
-            self.buy_machines(n_machines)
-            # update activity log
-            user_activity_log[self.name][f'Day {current_day}']['Action 1'].append(self.n_machines)
+            try:
+                # query for the number of machines to purchase
+                n_machines = input('Enter number of ASIC machines to buy: ')
+
+                # ensure that the input is a number (preventing negative numbers, letters, and characters)
+                if not n_machines.isdigit():
+                    raise ValueError('Invalid input: Only positive numeric values are accepted.')
+
+                # convert data type to integer
+                n_machines = int(n_machines)
+
+                # update total machines owned and capital
+                self.buy_machines(n_machines)
+
+                # update activity log
+                user_activity_log[self.name][f'Day {current_day}']['Action 1'].append(self.n_machines)
+            
+            except ValueError as err:
+                print(err)
 
         # if choose to sell SDPA coins
         elif action == 2:
             try:
-                # prevent short selling
-                if self.sdpa_balance == 0:
-                    raise ValueError("Zero SDPA coin balance: Short-selling is not allowed.")
-                
                 # query for the number of coins to be sold
                 sdpa_sold = round(float(input('Enter the number of SDPA coins to be sold: ')), 2)
-
-                # prevent selling negative quantity of SDPA coins
-                if sdpa_sold < 0:
-                    raise ValueError("Invalid quantity: The number of SDPA coins to be sold cannot be negative")
 
                 # update SDPA coin balance and capital
                 self.sell_sdpa(sdpa_sold)
 
                 # update activity log
                 user_activity_log[self.name][f'Day {current_day}']['Action 2'].append(self.n_coins)
-            
-            # print error message
-            except ValueError as err:
-                print(err)
+
+            except ValueError:
+                print('Value error: Please enter a valid number. Letters, symbols, or empty input are not allowed.')
+    
 
         # if choose to switch ASIC machine (on/off)
         elif action == 3:
-            try:
-                # prevent changes to machine status if the user owns 0 machines
-                if self.machines == 0:
-                    raise ValueError("No machines owned: Cannot switch machine status without owning any machines.")
+            # update the machine status
+            self.machine_swith()
 
-                # update the machine status
-                self.machine_swith()
-
-                # update activity log
-                user_activity_log[self.name][f'Day {current_day}']['Action 3'].append(self.machine_status)
-
-            # print error message
-            except ValueError as err:
-                print(err)
+            # update activity log
+            user_activity_log[self.name][f'Day {current_day}']['Action 3'].append(self.machine_status)
 
         # if choose to mining type
         elif action == 4:
-            try:
-                # prevent changes to mining type if the user owns 0 machines
-                if self.machines == 0:
-                    raise ValueError("No machines owned: Cannot switch mining type without owning any machines.")
+            # update mining type
+            self.change_mining_type()
 
-                # update mining type
-                self.change_mining_type()
-
-                # update activity log
-                user_activity_log[self.name][f'Day {current_day}']['Action 4'].append(self.mining_type)
-            
-            # print error message
-            except ValueError as err:
-                print(err)
+            # update activity log
+            user_activity_log[self.name][f'Day {current_day}']['Action 4'].append(self.mining_type)
     
     # charging electricity bill    
     def electricity_bill(self, electricity_unit_price, current_day):
