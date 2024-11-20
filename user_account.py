@@ -34,21 +34,27 @@ class UserAccount:
     def buy_machines(self, n_machines, machine_price = 600):
         '''
         Not to be used alone
-        n_machines -> number of machines to be purchased
-        machine_price -> price for 1 unit of ASIC machine
+        n_machines -> (str) number of machines to be purchased
+        machine_price -> (float) price for 1 unit of ASIC machine
         '''
-        print(self.day_machines)
         try:
+            # ensure that the input is a positive integer (i.e. preventing negative numbers, non-integer, letters, and characters)
+            if not n_machines.isdigit():
+                raise ValueError('Invalid input: Only positive integer values are accepted. (Enter "0" to cancel purchase and go back to main menu.)')
+
+            # convert data type to integer
+            n_machines = int(n_machines)
+
             # ensure that the number of machines purchased per day does not exceed 10
             if self.day_machines + n_machines > 10:
-                raise ValueError('Invalid quantitiy: 10 is the daily limit on the purchase of ASIC machines. {self.day_machines} units has been purchased today.')
+                raise ValueError(f'Invalid quantitiy: 10 is the daily limit on the purchase of ASIC machines. {self.day_machines} units has been purchased today. (Enter "0" to cancel purchase and go back to main menu.)')
 
             # compute total cost
             total_cost = machine_price * n_machines
             
             # ensure that the user has sufficient capital to purchase the machines
             if total_cost > self.capital:
-                raise ValueError(f'invalid quantity: Insufficient capital to purchase {n_machines} units of ASIC machines.')
+                raise ValueError(f'invalid quantity: Insufficient capital to purchase {n_machines} units of ASIC machines. (Enter "0" to cancel purchase and go back to main menu.)')
             
             # store the number of machines purchased
             self.n_machines = n_machines
@@ -58,6 +64,8 @@ class UserAccount:
             self.machines += n_machines
             # update capital
             self.capital -= total_cost
+            # update valid indicator
+            self.valid_indicator = 1
 
         except ValueError as err:
             print(err)
@@ -68,16 +76,17 @@ class UserAccount:
         Not to be used alone
         n_coins -> number of coins to be sold
         '''
-        # store the number of coins to be sold
-        self.n_coins = n_coins
-
         try:
+            # ensure that the input is a postiive numeric value (including decimal, but exclude negative number)
+            if not n_coins.replace('.', '', 1).isdigit():
+                raise ValueError('Invalid quantitiy: Please enter a positive numeric value. (Enter "0" to cancel SDPA coins sale and go back to main menu.)')
+            
+            # covert data type to float
+            n_coins = float(n_coins)
+
             # prevent short-selling
             if n_coins > self.sdpa_balance:
-                raise ValueError("Insufficient balance: Cannot sell more SDPA coins than currently owned. Short-selling is not allowed.")
-            # prevent selling negative quantity of SDPA coins
-            if n_coins < 0:
-                raise ValueError("Invalid quantity: The number of SDPA coins to be sold cannot be negative")
+                raise ValueError(f'Insufficient balance: Short-selling is not allowed. You currently own {self.sdpa_balance} SDPA coins. (Enter "0" to cancel SDPA coins sale and go back to main menu.)')
 
             # update SDPA coin balance
             self.sdpa_balance -= n_coins
@@ -85,10 +94,16 @@ class UserAccount:
             # update capital
             self.capital += self.sdpa_price * n_coins
 
+            # update valid indicator
+            self.valid_indicator = 1
+
+            # store the number of coins to be sold
+            self.n_coins = n_coins
+
         # print error message
         except ValueError as err:
             print(err)
-
+            
     # switch the machines on/off
     def machine_swith(self):
         '''
@@ -149,41 +164,31 @@ class UserAccount:
 
         # if choose to buy mining machines
         if action == 1:
-            try:
+            # an indicator to keep track when a valid input has been provided
+            self.valid_indicator = 0
+            while self.valid_indicator == 0:
                 # query for the number of machines to purchase
                 n_machines = input('Enter number of ASIC machines to buy: ')
-
-                # ensure that the input is a number (preventing negative numbers, letters, and characters)
-                if not n_machines.isdigit():
-                    raise ValueError('Invalid input: Only positive numeric values are accepted.')
-
-                # convert data type to integer
-                n_machines = int(n_machines)
-
                 # update total machines owned and capital
                 self.buy_machines(n_machines)
-
-                # update activity log
-                user_activity_log[self.name][f'Day {current_day}']['Action 1'].append(self.n_machines)
-            
-            except ValueError as err:
-                print(err)
+                
+            # update activity log
+            user_activity_log[self.name][f'Day {current_day}']['Action 1'].append(self.n_machines)
 
         # if choose to sell SDPA coins
         elif action == 2:
-            try:
+            # an indicator to keep track when a valid input has been provided
+            self.valid_indicator = 0
+
+            while self.valid_indicator == 0:
                 # query for the number of coins to be sold
-                sdpa_sold = round(float(input('Enter the number of SDPA coins to be sold: ')), 2)
+                sdpa_sold = input('Enter the number of SDPA coins to be sold: ')
 
                 # update SDPA coin balance and capital
                 self.sell_sdpa(sdpa_sold)
 
-                # update activity log
-                user_activity_log[self.name][f'Day {current_day}']['Action 2'].append(self.n_coins)
-
-            except ValueError:
-                print('Value error: Please enter a valid number. Letters, symbols, or empty input are not allowed.')
-    
+            # update activity log
+            user_activity_log[self.name][f'Day {current_day}']['Action 2'].append(self.n_coins)
 
         # if choose to switch ASIC machine (on/off)
         elif action == 3:
