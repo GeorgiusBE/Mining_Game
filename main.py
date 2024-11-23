@@ -3,6 +3,32 @@ from market import Market
 from user_account import UserAccount
 from blockchain import BlockChain
 
+# function to obtain valid input
+def get_valid_input(prompt, min_val):
+    '''
+    A function to get an input that is a postiive integer greater than or equal to min_val
+
+    prompt -> (str) Message prompted to the user.
+    min_val -> (int) The desired minimum value.
+
+    returns
+    -------
+    (int) Returns the valid input
+    '''
+    while True:
+        try:
+            # query the user
+            user_input = input(prompt)
+
+            # ensure the input is user_input >= min_val and is a positive integer
+            if user_input.isdigit() and int(user_input) >= min_val:
+                return int(user_input)
+            # raise error
+            else:
+                raise ValueError(f'Invalid input: Only positive integer values greater than or equal to {min_val} are accepted.')
+        except ValueError as err:
+            print(err)
+
 # a function to compute and print daily summary results
 def daily_summary(user_activity_log, oper_users, sdpa_price_tdy, current_day, machine_price=600):
     '''
@@ -50,6 +76,8 @@ def daily_summary(user_activity_log, oper_users, sdpa_price_tdy, current_day, ma
 # function to print out key actions taken in the simulation
 def print_actions(user_activity_log, user_name, action_messages):
     '''
+    Intented to be used within the print_user_summary function
+
     user_activity_log -> (dict) activity log of all users; created in the BlockChain class
     user_name -> the name of the user
     action_messages -> (dict) key-value pair is represented by the action name and the corresponsing message
@@ -81,6 +109,8 @@ def print_actions(user_activity_log, user_name, action_messages):
 # function to compute total coins mined and electricity bill of a user in activity log
 def total_mined_and_bill(user_activity_log, user_name):
     '''
+    Intented to be used within the print_user_summary function
+    
     user_activity_log -> (dict) activity log that records all events for all users; created in the BlockChain class
     user_name -> name of the user the total is computed for
     '''
@@ -183,32 +213,6 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
 # indicator to keep track when valid input for the number of days has been provided
 n_days_ind = True
 
-# function to obtain valid input
-def get_valid_input(prompt, min_val):
-    '''
-    A function to get an input that is a postiive integer greater than or equal to min_val
-
-    prompt -> (str) Message prompted to the user.
-    min_val -> (int) The desired minimum value.
-
-    returns
-    -------
-    (int) Returns the valid input
-    '''
-    while True:
-        try:
-            # query the user
-            user_input = input(prompt)
-
-            # ensure the input is user_input >= min_val and is a positive integer
-            if user_input.isdigit() and int(user_input) >= min_val:
-                return int(user_input)
-            # raise error
-            else:
-                raise ValueError(f'Invalid input: Only positive integer values greater than or equal to {min_val} are accepted.')
-        except ValueError as err:
-            print(err)
-
 # query for number of days
 n_days = get_valid_input('Enter number of days in the simulation (Minimum: 7): ', 7)
 
@@ -220,14 +224,35 @@ machine_price = 600
 # set intial cash capital
 initial_capital = 50000
 
-# list of all users
+# list of all UserAaccount objects
 lst_users = []
+# list of all user names
+user_names = []
+
 for i in range(n_users):
-    # query for user names
-    name = input(f'Enter the name of User {i + 1}: ')
-    # create user object
-    user = UserAccount(name, initial_capital)
+    name_ind = True # indicator to keep track when a valid user name is provided
+    # loop until unique user name has been provided
+    while name_ind:
+        try:
+            # query for user names
+            name = input(f'Enter the name of User {i + 1}: ')
+            
+            # ensure that user names are unique
+            if name in user_names:
+                raise ValueError('Invalid name: User name must be unique.')
+
+            # create user object
+            user = UserAccount(name, initial_capital)
+
+            # update the indicator
+            name_ind = False
+
+        except ValueError as err:
+            print(err)
+
+    # update the list of users and names
     lst_users.append(user)
+    user_names.append(name)
 
 # create Market object
 market = Market()
@@ -253,7 +278,14 @@ for i in range(n_days):
     else:
         # SDPA price is updated based on yesterdays's price
         sdpa_price_tdy = market.new_sdpa_price()
-        print(f'Today\'s market price of SDPA coin is {sdpa_price_tdy} GBP')
+
+        # break the loop when SDPA price is less than or equal to zero
+        if sdpa_price_tdy <= 0:
+            print('Simulation ended. SDPA coin has been delisted.')
+            break
+        # otherwise print the market price
+        else:
+            print(f'Today\'s market price of SDPA coin is {sdpa_price_tdy} GBP')
     
     # print electricity price for the day
     elec_price_tdy = market.new_elec_price()
