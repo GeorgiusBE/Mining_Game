@@ -281,9 +281,6 @@ Enter action number: ''')
 
     # print end-of-day winner/s and the prize distributed
     print(f'{day_winners.capitalize()} wins PoW mining.')
-    
-    # print daily summary
-    daily_summary(user_activity_log, oper_users, sdpa_price_tdy, current_day, machine_price=600)
 
     # check for bankruptcy
     for user in oper_users.copy():
@@ -291,6 +288,9 @@ Enter action number: ''')
         # remove bankrupt users from list of operational users
         if user.bankrupt_status == 'yes':
             oper_users.remove(user)
+
+    # print daily summary
+    daily_summary(user_activity_log, oper_users, sdpa_price_tdy, current_day, machine_price=600)
 
     # stop the loop when all users are bankrupt
     if not oper_users:
@@ -301,8 +301,8 @@ total_mined_coins = total_prize * current_day
 
 # action messages template
 action_messages = {
-    'Action 1': lambda param: f'    - Purchased {sum(param)} ASIC machines.' if param else None,
-    'Action 2': lambda param: f'    - Sold {sum(param)} SDPA coins.' if param else None,
+    'Action 1': lambda param: f'    - Purchased {sum(param)} ASIC machines.' if param and sum(param)!=0 else None,
+    'Action 2': lambda param: f'    - Sold {sum(param)} SDPA coins.' if param and sum(param)!=0 else None,
     'Action 3': lambda param: f'    - ASIC machines are turned {param[-1]}.' if param else None,
     'Action 4': lambda param: f'    - Changed mining type to {param[-1]}.' if param else None,
     'Prize': lambda param: f'    - Received {param} SDPA coins from mining activity.' if param else None,
