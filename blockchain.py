@@ -1,16 +1,82 @@
 import random
 
 class BlockChain:
+    '''
+    A class used to determine and distribute daily prize to the winning users;
+    as well as to record users' actions in a log.
+
+    ...
+
+    Attributes
+    ----------
+    n_days : int
+        Number of days in the simulation.
+
+    Methods
+    -------
+    create_logs(lst_users)
+        Creates 2 logs:
+            - Stores users key actions.
+            - Stores users that went benkrupt.
+    winner(list_operational_users, current_day, base_pooled_mach = 1000, total_prize = 100)
+        Determines the daily winners and the prize distributed to those winners.
+    '''
+
     def __init__(self, n_days):
-        # create winners log
         '''
-        n_days -> total number of days
+        Parameters
+        ----------
+        n_days : int
+            Number of days in the simulation.
         '''
+
         # store the number of days in the simulation
         self.n_days = n_days
 
     # create logs
     def create_logs(self, lst_users):
+        '''
+        Creates 2 logs:
+        1. User activity log: Stores users key actions during the simulation.
+        2. Bankruptcy log: Stores users who went benkrupt and the corresponding day of bankruptcy.
+        
+        Parameters
+        ----------
+        lst_users : list
+            A list of `UserAccount` objects of all users.
+        
+        Attributes
+        ----------
+        user_activity_log : dict
+            A nested dictionary to stores users key actions in the simulation.
+            The data structure is,
+                {
+                    user_name: {
+                        day: {
+                            action: [param]
+                        }
+                    }
+                }
+            where:
+                - user_name : str
+                    The user name.
+                - day : str
+                    The day during the simulation (e.g. 'Day 1').
+                - action : str
+                    The type of action performed.
+                - param
+                    The specified parameter for the action performed.
+        bankruptcy_log : dict
+            Stores the user names of users that went bankrupt, along with their respective day of bankruptcy.
+        
+        Returns
+        -------
+        tuple
+            A tuple containing 2 dictionaries:
+            1. `user_activity_log` (dict): The user activity log.
+            2. `bankruptcy_log` (dict): The bankruptcy log.
+        '''
+
         # create activity log
         self.user_activity_log = {}
         for user in lst_users:
@@ -24,14 +90,59 @@ class BlockChain:
     # determine the end-of-day winner
     def winner(self, list_operational_users, current_day, base_pooled_mach = 1000, total_prize = 100):
         '''
-        list_operational_users -> list of users (in the form of UserAccount class objects) that are operational (not bankrupt).
-        current_day -> the current day (int)
-        base_pooled_mach -> the base number of machines in the mining pool
-        total_prize -> the SDPA prize to be awarded to winning player/s during the day 
+        Determine the daily winner and distrbute the daily prize to the winners.
+        
+        The daily winner is chosen at ranodm, with the probabilty of winning is proportional to the their mining power.
+        - If a user with solo mining type wins, they will receive the whole daily prize.
+        - If the pool wins, users in the pool will be receive a portion of the total daily prize, based on their mining
+        power relative to the aggregate mining power in the pool.
+        
+        Parameters
+        ----------
+        list_operational_users : list
+            A list of `UserAccount` objects of all users that are operational (i.e. they have not gone bankrupt).
+        current_day :int
+            The current day.
+        base_pooled_mach : int, optional
+            The base number of machines in the pool (default is 1000).
+        total_prize : int or float, optional ################################
+            The total daily SDPA prize to be awarded to the winning player/s at the end of the day (default is 100). 
+        
+        Attributes
+        ----------
+        base_pooled_mach : int
+            The base number of machines in the pool.
+        list_operational_users : list
+            A list of `UserAccount` class objects of all users that are operational (i.e. they have not gone bankrupt).
+        total_machines : int
+            The total number of machines (including active (on) and inactive (off) machines).
+        mining_players : dict
+            Stores the user names of users who have their machines turned on, along with
+            their respective computing power (i.e. the number of machines owned).
+            Note:
+                - Users with `pooled` mining type are aggregated under the `pooled` key.
+        active_machines : int
+            Total number of active (on) machines across all operational users.
+        players_proportion : dict
+            Stores the user names with their respective proportional mining power, relative to the number of active machines.
+        players_cum_prop : dict
+            Stores the cumulative sum of the proportion mining power of each users.
+        
+        Returns
+        -------
+        str
+            The name of the winning user. If the pooled mining group wins, 'pooled' is returned, instead of the users
+            involved in the mining pool.
+
+        Restrictions
+        ------------
+        - This method can only be called after the `create_logs` method has been called, as the
+        `user_activity_log` attribute is initialized in the `create_logs` method.
         '''
+
         # base number of machines in the pool
         self.base_pooled_mach = base_pooled_mach
-        # create an attribute for the list of UserAccount objects
+        # an attribute for the list of UserAccount objects of opeartional users
         self.list_operational_users = list_operational_users
 
         # store the total number of machines (including active and inactive machines)
