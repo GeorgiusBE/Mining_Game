@@ -180,10 +180,40 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
 
 ##################################################################################################################
 
+# indicator to keep track when valid input for the number of days has been provided
+n_days_ind = True
+
+# function to obtain valid input
+def get_valid_input(prompt, min_val):
+    '''
+    A function to get an input that is a postiive integer greater than or equal to min_val
+
+    prompt -> (str) Message prompted to the user.
+    min_val -> (int) The desired minimum value.
+
+    returns
+    -------
+    (int) Returns the valid input
+    '''
+    while True:
+        try:
+            # query the user
+            user_input = input(prompt)
+
+            # ensure the input is user_input >= min_val and is a positive integer
+            if user_input.isdigit() and int(user_input) >= min_val:
+                return int(user_input)
+            # raise error
+            else:
+                raise ValueError(f'Invalid input: Only positive integer values greater than or equal to {min_val} are accepted.')
+        except ValueError as err:
+            print(err)
+
 # query for number of days
-n_days = int(input('Enter number of days in the simulation: '))
+n_days = get_valid_input('Enter number of days in the simulation (Minimum: 7): ', 7)
+
 # query for number of users
-n_users = int(input('Enter number of users in the simulation: '))
+n_users = get_valid_input('Enter number of users in the simulation (Minimum: 2): ', 2)
 
 # set the price for 1 unit of ASIC machine
 machine_price = 600
@@ -256,17 +286,19 @@ Enter action number: ''')
                 # raise error if the input 
                 if action not in ['1','2','3','4','5']:
                     raise ValueError('Invalid input: To select the action, please enter 1, 2, 3, 4, or 5.')
+                
                 # convert the input into integer
                 action = int(action)
+                
+                # break the loop if the user chooses to end action
+                if action == 5:
+                    break
+                
+                # perform the specified action
+                user.action_query(action, sdpa_price_tdy, current_day, user_activity_log)
+            
             except ValueError as err:
                 print(err)
-            
-            # break the loop if the user chooses to end action
-            if action == 5:
-                break
-            
-            # perform the specified action
-            user.action_query(action, sdpa_price_tdy, current_day, user_activity_log)
     
         # electricity bill payment
         user.electricity_bill(elec_price_tdy, current_day)
