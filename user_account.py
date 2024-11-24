@@ -1,12 +1,73 @@
+'''
+user_account.py
+---------------
+
+
+Class
+-----
+
+'''
+
+
+# import libraries
 import math
 
 # UserAccount class
 class UserAccount:
+    '''
+    A module to store and manage user data in blockchain simulation.
+
+    This modules stores user information, including name, capital, SDPA coins balance,
+    number of machines owned, machines status, and mining type. Based on the user's
+    chosen action, this module will update the user data.
+
+    ...
+
+    Attributes
+    ----------
+    name : str
+        The user's name.
+    capital : float
+        The cash capital of the user.
+    sdpa_balance : float
+        The number of SDPA coins the user owns.
+    machines : int
+        The total number of machines the user owns.
+    machine_status : str
+        The machine status can be turned on or off.
+    mining_type : str
+        Users can either be a solo miner or part of a mining pool.
+    bankrupt_status : str
+        Indicates whether the user is bankrupt ('yes' or 'no').
+    
+    Methods
+    -------
+    reset_daily_machine_purchases()
+        To reset the count of the number of machines purchased for the day.
+    buy_machines(n_machines, machine_price = 600)
+        Updates the number of machines owned and capital balance for the purchase of machines.
+    sell_sdpa(n_coins)
+        Updates the capital and SDPA coin balance for the sale of SPDA coins.
+    machine_switch()
+        Toggles machine status between 'off' or 'on'.
+    change_mining_type()
+        Toggles mining type between 'solo' or 'pooled'
+    action_query(action, sdpa_price, current_day, user_activity_log)
+        Handles user's chosen action and updates the logs.
+    electricity_bill(electricity_unit_price, current_day)
+        Update the capital balance for electricity bill payment.
+    bankrupt_check(current_day, bankruptcy_log)
+        Performs automatic sale of SDPA coins if capital turns negative; otherwise delcare bankruptcy.
+    '''
 
     def __init__(self, name, capital = 50000):
         '''
-        name -> name of the user
-        capital -> the starting cash capital fo0r the user
+        Parameters
+        ----------
+        name : str
+            Name of the user.
+        capital : int or float, optional
+            The starting cash capital of the user (default = 50000).
         '''
         # name of the user
         self.name = name
@@ -26,17 +87,49 @@ class UserAccount:
     
     def reset_daily_machine_purchases(self):
         '''
-        Resets the object that tracks the number of machines purchased per day.
+        To reset the count of the number of machines purchased for the day.
+        This is intended to ensure that the daily purchase limit of the machines is honored.
+
+        Attributes
+        ----------
+        day_machines : int
+            The total number of machines that has been purchased in a trading day.
         '''
         self.day_machines = 0
     
     # purchase new machines
     def buy_machines(self, n_machines, machine_price = 600):
         '''
-        Not to be used alone
-        n_machines -> (str) number of machines to be purchased
-        machine_price -> (float) price for 1 unit of ASIC machine
+        Manages the purchase of mining machines.
+        
+        Handles the purchase of ASIC mining machines by updating the number of machines owned and
+        the capital balance. Moreover, it ensure that the user is within the purchase limit and
+        have sufficient capital.
+
+        Parameters
+        ----------
+        n_machines : str
+            The number machines to be purchased. Only accepts a positive integer as a string.
+        machine_price : int or float, optional
+            The cost of 1 ASIC machine (default = 600).
+
+        Raises
+        ------
+        ValueError
+            If `n_machines` is not a positive integer, exceeds the daily purchase limit of 10, or
+            insufficient capital to complete the purchase.
+
+        Restrictions
+        ------------
+        - This method can only be called after the `reset_daily_machine_purchases` method has been
+        called, as the `day_machines` attribute is initialized in the `reset_daily_machine_purchases`
+        method.
+        
+        Note
+        ----
+        - This method is intended to be called within the `action_query` method.
         '''
+
         try:
             # ensure that the input is a positive integer (i.e. preventing negative numbers, non-integer, letters, and characters)
             if not n_machines.isdigit():
@@ -73,11 +166,25 @@ class UserAccount:
     # sell SDPA coin
     def sell_sdpa(self, n_coins):
         '''
-        Not to be used alone
-        n_coins -> number of coins to be sold
+        Handles the sale of SDPA coins by updating the SDPA coin balance and capital.
+
+        Parameters
+        ----------
+        n_coins : str
+            The number of coins to be sold. Only accepts positive number as a string.
+
+        Raises
+        ------
+        ValueError
+            If `n_coins` is not a positive number or if the user attempts to short-sell.
+
+        Notes
+        -----
+        - This method is intended to be called within the `action_query` method.
         '''
+
         try:
-            # ensure that the input is a postiive numeric value (including decimal, but exclude negative number)
+            # ensure that the input is a postive numeric value (including decimal, but exclude negative number)
             if not n_coins.replace('.', '', 1).isdigit():
                 raise ValueError('Invalid quantitiy: Please enter a positive numeric value. (Enter "0" to cancel SDPA coins sale and go back to main menu.)')
             
@@ -107,8 +214,18 @@ class UserAccount:
     # switch the machines on/off
     def machine_swith(self):
         '''
-        Not to be used alone
+        Toggles the machine status between 'on' and 'off'.
+        
+        Raises
+        ------
+        ValueError
+            If the user attempts to change maching status when they own 0 machines.
+
+        Notes
+        -----
+        - This method is intended to be called within the `action_query` method.
         '''
+
         try:
             # prevent changes to machine status if the user owns 0 machines
             if self.machines == 0:
@@ -128,8 +245,18 @@ class UserAccount:
     # switch mining type (solo/pooled)
     def change_mining_type(self):
         '''
-        Not to be used alone
+        Toggles the mining type between 'solo' and 'pooled'.
+
+        Raises
+        ------
+        ValueError
+            If the user attempts to change mining type when they own 0 machines.
+
+        Notes
+        -----
+        - This method is intended to be called within the `action_query` method.
         '''
+
         try:
             # prevent changes to mining type if the user owns 0 machines
             if self.machines == 0:
@@ -146,15 +273,62 @@ class UserAccount:
         except ValueError as err:
             print(err)
 
-    # query user to pick an action
+    # process user's chosen action
     def action_query(self, action, sdpa_price, current_day, user_activity_log):
         '''
-        action -> which action to make (int) [1,2,3,4,5]
-        sdpa_price -> the market price of the SDPA coin
-        current_day -> the current day (int)
-        user_activity_log -> a blank template to record users' activity log. It should have the data structure of ...
-        day_machines -> the number of machines that has been purchased in the same day
+        Excecutes user's chosen actions.
+
+        Links user's chosen action to the relevant method, and records chosen action to the user activity log.
+        
+        Parameters
+        ----------
+        action : int
+            The user's chosen action is repsented as an integer.
+            1: Purchase mining machines, 2: Sell SDPA coins, 3: Switch ASIC on/off, 4: Switch solo/pooled mining.
+        sdpa_price : float
+            The market price of the SDPA coin.
+        current_day : int
+            The current day.
+        user_activity_log : dict
+            A nested dictionary that stores user's key actions.
+            This log is generated by the `create_logs` method of the BlockChain class.
+            The data structure is,
+                {
+                    user_name: {
+                        day: {
+                            action: [param]
+                        }
+                    }
+                }
+            where:
+                - user_name : str
+                    The user name.
+                - day : str
+                    The day during the simulation (e.g. 'Day 1').
+                - action : str
+                    The type of action performed (e.g. 'Action 1').
+                - param
+                    The specified parameter for the action performed.
+
+
+        Attributes
+        ----------
+        current_day : int
+            The current day.
+        sdpa_price : float
+            The market price of the SDPA coin.
+        user_activity_log : dict
+            A nested dictionary that stores user's key actions.
+        valid_indicator : int
+            An indicator to keep track when a valid user input has been provided.
+
+        Notes
+        -----
+        - This method assumes that the correct data structure has been provided for the `user_activity_log`
+        parameter. For convenience, use the `BlockChain` class' `create_logs` method to generate this log. 
+
         '''
+
         # set the current day
         self.current_day = current_day
         # store today's SDPA price
@@ -209,12 +383,37 @@ class UserAccount:
     # charging electricity bill    
     def electricity_bill(self, electricity_unit_price, current_day):
         '''
-        electricity_unit_price -> the price for 1 unit of electricity (use the electricity price generated from Market class)
-        current_day -> current day (Note that this is purposefully redefined, and not using the current_day
-                       defined in the action_query method. This is because when action 5 is chosen, action_query
-                       does not get called, and thus the self.current day does not get updated. -> refer to the
-                       "if action == 5: break" line of code in the main.py file.)
+        Charge electricity bill.
+
+        Computes total electricity bill based on the number of active machines and the market price
+        of electricity. Deducts the user's capital balance and record the electricity expense to the
+        user activity log. 
+        
+        Parameters
+        ----------
+        electricity_unit_price : float
+            The per unit price of electricity.
+        current_day : int
+            The current day.
+
+        Attributes
+        ----------
+        total_bill
+            The total electricity bill the user is charged for the day.
+
+        Restrictions
+        ------------
+        - This method can only be called after the `action_query` method has been called, as the
+        `user_activity_log` attribute is defined in the `action_query` method.
+        
+        Notes
+        -----
+        - `current_day` parameter is purposefully redefined because the `current_day` attribute defined
+        in the action_query method may not always be 'up-to-date'. For example, if Action 5 (i.e. End Action)
+        is the only chosen action by the user, `action_query` method does not get called, and thus the
+        `current_day` attribute does not get updated.
         '''
+
         # only charge electricity bill when the machines are on
         if self.machine_status == 'on':
             # compute total bill
@@ -229,11 +428,33 @@ class UserAccount:
     # check for bankruptcy
     def bankrupt_check(self, current_day, bankruptcy_log):
         '''
-        current_day -> current day (Note that this is purposefully redefined, and not using the current_day
-                       defined in the action_query method. This is because when action 5 is chosen, action_query
-                       does not get called, and thus the self.current day does not get updated. -> refer to the
-                       "if action == 5: break" line of code in the main.py file.)
+        Check for bankruptcy.
+
+        When the user's capital is detected to be negative, SDPA coins will be automatically sold, such that
+        the capital is no longer negative. If the user has insufficient SDPA coins, the user will be declared
+        bankrupt.
+        Updates the user activity and bankruptcy log.  
+
+        Parameters
+        ----------
+        current_day : int
+            The current day
+        bankruptcy_log : dict
+            A log that stores name of users who went benkrupt and the corresponding day of bankruptcy.
+
+        Restrictions
+        ------------
+        - This method can only be called after the `action_query` method has been called, as the
+        `user_activity_log` attribute is defined in the `action_query` method.
+        
+        Notes
+        -----
+        - `current_day` parameter is purposefully redefined because the `current_day` attribute defined
+        in the action_query method may not always be 'up-to-date'. For example, if Action 5 (i.e. End Action)
+        is the only chosen action by the user, `action_query` method does not get called, and thus the
+        `current_day` attribute does not get updated.
         '''
+
         # check for negative capital
         if self.capital < 0:
             # the required number of coins to be sold to address negative capital
@@ -244,7 +465,7 @@ class UserAccount:
             # check whether the user owns enough SDPA coin
             if sdpa_auto_sale <= self.sdpa_balance:
                 # sell the required amount of SDPA coin
-                self.sell_sdpa(sdpa_auto_sale)
+                self.sell_sdpa(str(sdpa_auto_sale))
                 print(f'{sdpa_auto_sale} SDPA coins belonging to {self.name.capitalize()} were automatically sold to resolve the negative capital balance.')
 
                 # update activity log
