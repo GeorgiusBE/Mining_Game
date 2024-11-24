@@ -1,10 +1,15 @@
 '''
 user_account.py
 ---------------
+A module to store and manage user data in blockchain simulation
 
+This module focuses on user data management. Based on the user's chosen action, user data gets updated.
+It also logs all actions that the user performs.
 
-Class
------
+Classes 
+-------
+UserAccount
+    A class that represents the user's account, storing and managing user's data.
 
 '''
 
@@ -15,12 +20,11 @@ import math
 # UserAccount class
 class UserAccount:
     '''
-    A module to store and manage user data in blockchain simulation.
+    A class to store and manage user data in blockchain simulation.
 
-    This modules stores user information, including name, capital, SDPA coins balance,
-    number of machines owned, machines status, and mining type. Based on the user's
-    chosen action, this module will update the user data.
-
+    This module stores user information, including name, capital, SDPA coins balance,
+    number of machines owned, machines status, and mining type.
+    Moreover, user data will be updated based on the user's chosen action.
     ...
 
     Attributes

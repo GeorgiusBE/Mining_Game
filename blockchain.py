@@ -1,10 +1,27 @@
+'''
+blockchain.py
+---------------
+A module to simulate blockchain mining.
+
+This module defines the `Blockchain` class. Users can get involved in mining activity as either a solo miner or as part
+of a mining pool. The winner will be determined randomly, where probability of winning is proportional to the
+computational power of the users, and the winner will receive the prize.
+Moreover, logs are initialized to record all users activities.
+
+Class
+-----
+BlockChain
+    A class to determine the daily winners and distribute daily prize, as well as to generate user activity log and bankruptcy log.
+
+'''
+
+# import libraries
 import random
 
 class BlockChain:
     '''
     A class used to determine and distribute daily prize to the winning users;
     as well as to record users' actions in a log.
-
     ...
 
     Attributes
@@ -38,7 +55,7 @@ class BlockChain:
         '''
         Creates 2 logs:
         1. User activity log: Stores users key actions during the simulation.
-        2. Bankruptcy log: Stores users who went benkrupt and the corresponding day of bankruptcy.
+        2. Bankruptcy log: Stores name of users who went benkrupt and the corresponding day of bankruptcy.
         
         Parameters
         ----------
@@ -96,7 +113,7 @@ class BlockChain:
         - If a user with solo mining type wins, they will receive the whole daily prize.
         - If the pool wins, users in the pool will be receive a portion of the total daily prize, based on their mining
         power relative to the aggregate mining power in the pool.
-        
+
         Parameters
         ----------
         list_operational_users : list
@@ -105,7 +122,7 @@ class BlockChain:
             The current day.
         base_pooled_mach : int, optional
             The base number of machines in the pool (default is 1000).
-        total_prize : int or float, optional ################################
+        total_prize : int or float, optional
             The total daily SDPA prize to be awarded to the winning player/s at the end of the day (default is 100). 
         
         Attributes

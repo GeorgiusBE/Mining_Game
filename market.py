@@ -1,10 +1,29 @@
+'''
+market.py
+---------
+A module to generate the market price of SDPA coin and per unit of electricity.
+
+This module defines the `Market` class. It sets an intial price of SDPA coin at 50 GBP, and applies randomly generated
+daily returns, drawn from a normal distribution, to simulate price movement. It also generates the per unit market price
+of electricity, drawn from a uniform distribution.
+
+Class
+-----
+Market
+    A class to generate SDPA coin and electricity market price.
+'''
+
+
 # import libraries
 import random
 
 class Market:
     '''
-    A class to generate SDPA coin and electricity market price
+    A class to generate SDPA coin and electricity market price,
 
+    SDPA coin market price always starts at 50 GBP, and each day, the price will randomly move based on the randomly
+    generated returns, drawn from a normal distribution.
+    Market price for per unit of electricity is randomly generated from a uniform distribution.
     ...
 
     Attributes
@@ -36,8 +55,8 @@ class Market:
         '''
         Generate SDPA coin market price.
 
-        The coin's daily return is randomly generated from the Normal distribution
-        with mean 0.01 and std. 0.005, i.e. N~(0.01, 0.005).
+        The coin's market price starts at 50 GBP. Each day, the market price will move based on the coin's randomly generated
+        daily return, drawn from the Normal distribution with mean 0.01 and std. 0.005, i.e. N~(0.01, 0.005).
         
         Returns
         -------
