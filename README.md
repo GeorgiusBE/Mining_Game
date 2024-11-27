@@ -39,20 +39,27 @@ The project follows a modular and object-oriented design to ensure scalability a
 The key components of the code are as follows,
 (The details on the content of the each files will be provided in later section.)
 - Main Application (main.py file)
+
     It acts as the entry point that orchestrates all of the classes. It is responsible in initializing the application, managing the simulation loop, and dealing with user interactions.
 - UserAccount Class (user_account.py file)
+
     All of user related functionality are centralized and encapsulated in this class. This includes processing actions and manage user’s data. It includes the `action_query` method that is used to route user’s chosen action to the appropriate method.
 - Blockchain Class (blockchain.py file)
+
     The blockchain mining logic is encapsulated in this class. It contains the method to determine the winning miner and distribute prizes to the winners. Moreover, this class also stores all user actions, ensuring organized storage of all user actions during the simulation.
 - Market Class (market.py file)
+
     It centralizes the generation of the market price of coin and electricity. This ensures consistent pricing mechanisms during the simulation.
 
 Key features of the code design,
 - Modularity, Encapsulation, and Centralization
+
 Each core functionality, including user data management, price generation, and blockchain mining logic, is encapsulated in separate classes, and their internal details are hidden from the main.py file. This ensures a clear separation of concerns, maintains encapsulation, and centralization.
 - Scalability
+
 The design facilitates scalability by allowing easy extension of features. For example, new action types can be added by creating additional methods within the UserAccount class.
 - Error Handling
+
 Input validation and error handling mechanisms are implemented throughout the code to ensure the application can handle invalid actions or inputs. For example, error messages are raised when an invalid input is provided, and user will be guided to correct their invalid input.
 
 
