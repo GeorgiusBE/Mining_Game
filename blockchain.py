@@ -1,3 +1,7 @@
+# Georgius Benedikt Ermanta
+# Fintech
+# This module defines the `BlockChain` class which is used to simulate blockchain mining.
+
 '''
 blockchain.py
 ---------------
@@ -89,9 +93,9 @@ class BlockChain:
         Returns
         -------
         tuple
-            A tuple containing 2 dictionaries:
-            1. `user_activity_log` (dict): The user activity log.
-            2. `bankruptcy_log` (dict): The bankruptcy log.
+            A tuple containing 2 elements:
+            - dict: The user activity log.
+            - dict: The bankruptcy log.
         '''
 
         # create activity log

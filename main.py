@@ -1,20 +1,27 @@
+# Georgius Benedikt Ermanta
+# Fintech
+# This module serves as the orchestrator between the market, user accounts, and blockchain, creating a simulation of SDPA coin mining
+# where users are tasked to manage assets, handle market dynamics, mine SDPA coins, and ultimately to maximize returns.
+
 '''
 main.py
 -------
 This module serves as the orchestrator between the market, user accounts, and blockchain, creating a simulation of SDPA coin mining
-where users are tasked to manage assets, handle market dynamics, mine SDPA coins, and ultimately to get as mush returns as they can.
+where users are tasked to manage assets, handle market dynamics, mine SDPA coins, and ultimately to maximize returns.
 
 The simulation can be broken down into the following steps,
 1. Set up the simulation environment (such as the number of days, users, and the name of the users).
-2. Users decide on actions to perform each day (such as purchase ASIC machines, sell SDPA coins, etc.).
-3. Provide performance summaries at the end of the simulation for each user.
+2. Market price of the SDPA coin and per unit of electricity are genereated.
+3. Users decide on actions to perform each day (such as purchase ASIC machines, sell SDPA coins, etc.).
+4. Step 2 and 3 are repeated until the simulation ends, where performance summaries for each user are generated.
 
 Usage
 -----
 To run the simulation:
     1. The `market.py`, `user_account.py`, and `blockchain.py` files need to be in the same directory as `main.py`.
     2. Open Command Prompt and change directory to where `main.py` is located.
-    3. Run the `main.py` script in the Command Prompt.
+    3. Run the `main.py` script in the Command Prompt by entering
+            `python main.py`
 
 Functions
 ---------
@@ -154,11 +161,11 @@ def daily_summary(user_activity_log, oper_users, sdpa_price_tdy, current_day, ma
 
         # print out the daily summary
         print(user_name.capitalize() + ':')
-        print(f'    - Paper profit is {user_paper_profit} GBP.')
-        print(f'    - Net spending is {user_net_spending} GBP.')
-        print(f'    - Prize received is {user_prize} SDPA coins.')
-        print(f'    - Number of SDPA coins sold is {user_sold} units.')
-        print(f'    - Electrcity bill paid is {user_elec} GBP.')
+        print(f'    - Paper profit is {round(user_paper_profit, 2)} GBP.')
+        print(f'    - Net spending is {round(user_net_spending, 2)} GBP.')
+        print(f'    - Prize received is {round(user_prize, 2)} SDPA coins.')
+        print(f'    - Number of SDPA coins sold is {round(user_sold, 2)} units.')
+        print(f'    - Electrcity bill paid is {round(user_elec, 2)} GBP.')
         print(f'    - Number of ASIC machines purchased is {user_purchase} units.')
 
 
@@ -170,10 +177,6 @@ def print_actions(user_activity_log, user_name, action_messages):
     This function utilizes the data stored in `user_activity_log` and the template message in `action_messages`
     to print a user's activity details for each day throughout the simulation.
     "No actions performed today" is printed if the user did not perform any action for the day.
-
-    user_activity_log -> (dict) activity log of all users; created in the BlockChain class
-    user_name -> the name of the user
-    action_messages -> (dict) key-value pair is represented by the action name and the corresponsing message
     
     Parameters
     ----------
@@ -200,7 +203,22 @@ def print_actions(user_activity_log, user_name, action_messages):
     user_name : str
         The name of the user whose actions are going to be summarized.
     action_messages : dict
-        Stores the action names (keys) and its respective message formatting functions (values)
+        Stores the action names (keys) and its respective message formatting functions (values).
+        A valid dictionary for action_messages needs to have,
+        - Keys: The keys must include the following action names: 'Action 1', 'Action 2', 'Action 3', 'Action 4', 'Prize',
+          'Electricity', and 'Bankrupt'.
+        - Values: Each value is a lambda function with the parameter `param`. This parameter corresponds to the data stored in the
+          in the user_activity_log dictionary for the respective action.
+        An example `action_messages` could look like this,
+            action_messages = {
+            'Action 1': lambda param: f'    - Purchased {sum(param)} ASIC machines.' if param and sum(param)!=0 else None,
+            'Action 2': lambda param: f'    - Sold {sum(param)} SDPA coins.' if param and sum(param)!=0 else None,
+            'Action 3': lambda param: f'    - ASIC machines are turned {param[-1]}.' if param else None,
+            'Action 4': lambda param: f'    - Changed mining type to {param[-1]}.' if param else None,
+            'Prize': lambda param: f'    - Received {param} SDPA coins from mining activity.' if param else None,
+            'Electricity': lambda param: f'    - Paid {param} GBP on electricity bill.' if param else None,
+            'Bankrupt': lambda param: f'    - Went bankrupt'
+            }
 
     Notes
     -----
@@ -237,10 +255,7 @@ def total_mined_and_bill(user_activity_log, user_name):
     Computes the total coins mined and total electricity bill for a user.
 
     This function aggregates the prizes won throughout the simulation that is stored in the `user_activity_log`,
-    similarly with electricity bill. 
-
-    user_activity_log -> (dict) activity log that records all events for all users; created in the BlockChain class
-    user_name -> name of the user the total is computed for
+    similarly with electricity bill.
     
     Parameters
     ----------
@@ -277,8 +292,8 @@ def total_mined_and_bill(user_activity_log, user_name):
     Notes
     -----
     Intented to be used within the print_user_summary function
-
     '''
+
     # store total values
     user_mined_coins = 0 # total coins mined
     user_total_bill = 0 # total electricity bill
@@ -335,11 +350,26 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
     bankruptcy_log : dict
         Stores the user names of users that went bankrupt, along with their respective day of bankruptcy.
     action_messages : dict
-        Stores the action names (keys) and its respective message formatting functions (values)
+        Stores the action names (keys) and its respective message formatting functions (values).
+        A valid dictionary for action_messages needs to have,
+        - Keys: The keys must include the following action names: 'Action 1', 'Action 2', 'Action 3', 'Action 4', 'Prize',
+          'Electricity', and 'Bankrupt'.
+        - Values: Each value is a lambda function with the parameter `param`. This parameter corresponds to the data stored in the
+          in the user_activity_log dictionary for the respective action.
+        An example `action_messages` could look like this,
+            action_messages = {
+            'Action 1': lambda param: f'    - Purchased {sum(param)} ASIC machines.' if param and sum(param)!=0 else None,
+            'Action 2': lambda param: f'    - Sold {sum(param)} SDPA coins.' if param and sum(param)!=0 else None,
+            'Action 3': lambda param: f'    - ASIC machines are turned {param[-1]}.' if param else None,
+            'Action 4': lambda param: f'    - Changed mining type to {param[-1]}.' if param else None,
+            'Prize': lambda param: f'    - Received {param} SDPA coins from mining activity.' if param else None,
+            'Electricity': lambda param: f'    - Paid {param} GBP on electricity bill.' if param else None,
+            'Bankrupt': lambda param: f'    - Went bankrupt'
+            }
     machine_price : float, optional
         The price for 1 ASIC machine (default = 600).
-    
     '''
+
     # print user's name
     print(user.name.capitalize() + ':')
 
@@ -355,14 +385,14 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
         user_mined_coins, user_total_bill = total_mined_and_bill(user_activity_log, user.name)
 
         # print the total number of coins mined
-        print(f'- Total coins mined = {user_mined_coins} coins')
+        print(f'- Total coins mined = {round(user_mined_coins, 2)} coins')
 
         # print mining performance
         mine_performance = user_mined_coins/total_mined_coins * 100
-        print(f'- Mining performance (%) = {mine_performance}%')
+        print(f'- Mining performance (%) = {round(mine_performance, 2)}%')
 
         # print total electricity bill
-        print(f'- Total electricity bill = {user_total_bill} GBP.')
+        print(f'- Total electricity bill = {round(user_total_bill, 2)} GBP.')
 
         # print actions summary
         print('- Key actions performed,')
@@ -371,21 +401,21 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
     # for users who remain oprational
     else:
         # print final (cash) capital balance
-        print(f'- Cash capital balance = {user.capital}')
+        print(f'- Cash capital balance = {round(user.capital, 2)}')
 
         # print final SDPA coin balance
-        print(f'- SDPA coin balance = {user.sdpa_balance}')
+        print(f'- SDPA coin balance = {round(user.sdpa_balance, 2)}')
         
         # print dollar value of final SDPA coin balance
         dollar_sdpa_balance = user.sdpa_balance * sdpa_price_tdy
-        print(f'- GBP value of SDPA coin balance = {dollar_sdpa_balance}')
+        print(f'- GBP value of SDPA coin balance = {round(dollar_sdpa_balance, 2)}')
         
         # print final number of ASIC machines owned
         print(f'- ASIC machines count = {user.machines}')
         
         # print total GBP value of all assets (assuming the machines' value do not depreciate)
         total_assets = user.capital + dollar_sdpa_balance + user.machines * machine_price
-        print(f'- Total GBP value of all assets = {total_assets}')
+        print(f'- Total GBP value of all assets = {round(total_assets, 2)}')
 
         # print investment return
             # GBP investment return
@@ -399,23 +429,19 @@ def print_user_summary(user, sdpa_price_tdy, total_mined_coins, user_activity_lo
         user_mined_coins, user_total_bill = total_mined_and_bill(user_activity_log, user.name)
 
         # print the total number of coins mined
-        print(f'- Total coins mined = {user_mined_coins} coins')
+        print(f'- Total coins mined = {round(user_mined_coins, 2)} coins')
 
         # print mining performance
         mine_performance = user_mined_coins/total_mined_coins * 100
-        print(f'- Mining performance (%) = {mine_performance}%')
+        print(f'- Mining performance (%) = {round(mine_performance, 2)}%')
 
         # print total electricity bill
-        print(f'- Total electricity bill = {user_total_bill} GBP.')
+        print(f'- Total electricity bill = {round(user_total_bill, 2)} GBP.')
 
         # print actions summary
         print('- Key actions performed,')
         print_actions(user_activity_log, user.name, action_messages)
 
-##################################################################################################################
-
-# indicator to keep track when valid input for the number of days has been provided
-n_days_ind = True
 
 # query for number of days
 n_days = get_valid_input('Enter number of days in the simulation (Minimum: 7): ', 7)
@@ -550,15 +576,15 @@ Enter action number: ''')
     # print end-of-day winner/s and the prize distributed
     print(f'{day_winners.capitalize()} wins PoW mining.')
 
+    # print daily summary
+    daily_summary(user_activity_log, oper_users, sdpa_price_tdy, current_day, machine_price=600)
+
     # check for bankruptcy
     for user in oper_users.copy():
         user.bankrupt_check(current_day, bankruptcy_log)
         # remove bankrupt users from list of operational users
         if user.bankrupt_status == 'yes':
             oper_users.remove(user)
-
-    # print daily summary
-    daily_summary(user_activity_log, oper_users, sdpa_price_tdy, current_day, machine_price=600)
 
     # stop the loop when all users are bankrupt
     if not oper_users:
@@ -569,12 +595,12 @@ total_mined_coins = total_prize * current_day
 
 # action messages template
 action_messages = {
-    'Action 1': lambda param: f'    - Purchased {sum(param)} ASIC machines.' if param and sum(param)!=0 else None,
-    'Action 2': lambda param: f'    - Sold {sum(param)} SDPA coins.' if param and sum(param)!=0 else None,
+    'Action 1': lambda param: f'    - Purchased {round(sum(param))} ASIC machines.' if param and sum(param)!=0 else None,
+    'Action 2': lambda param: f'    - Sold {round(sum(param))} SDPA coins.' if param and sum(param)!=0 else None,
     'Action 3': lambda param: f'    - ASIC machines are turned {param[-1]}.' if param else None,
     'Action 4': lambda param: f'    - Changed mining type to {param[-1]}.' if param else None,
-    'Prize': lambda param: f'    - Received {param} SDPA coins from mining activity.' if param else None,
-    'Electricity': lambda param: f'    - Paid {param} GBP on electricity bill.' if param else None,
+    'Prize': lambda param: f'    - Received {round(param, 2)} SDPA coins from mining activity.' if param else None,
+    'Electricity': lambda param: f'    - Paid {round(param, 2)} GBP on electricity bill.' if param else None,
     'Bankrupt': lambda param: f'    - Went bankrupt'
 }
 
@@ -590,11 +616,3 @@ for user in lst_users:
                        bankruptcy_log,
                        action_messages,
                        600)
-
-
-
-# print the user activity log
-print(user_activity_log)
-
-# print bankruptcy log
-print(bankruptcy_log)

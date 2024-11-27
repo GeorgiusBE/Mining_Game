@@ -1,3 +1,7 @@
+# Georgius Benedikt Ermanta
+# Fintech
+# This module is used to store and manage user data during the blockchian simulation.
+
 '''
 user_account.py
 ---------------
@@ -106,8 +110,8 @@ class UserAccount:
         '''
         Manages the purchase of mining machines.
         
-        Handles the purchase of ASIC mining machines by updating the number of machines owned and
-        the capital balance. Moreover, it ensure that the user is within the purchase limit and
+        Handles the purchase of ASIC machines by updating the number of machines owned and
+        the capital balance. Moreover, it ensures that the user is within the daily purchase limit and
         have sufficient capital.
 
         Parameters
@@ -170,7 +174,11 @@ class UserAccount:
     # sell SDPA coin
     def sell_sdpa(self, n_coins):
         '''
-        Handles the sale of SDPA coins by updating the SDPA coin balance and capital.
+        Manages the sale of SDPA coins.
+        
+        Handles the sale of SDPA coins by updating the SDPA coin balance and capital. It also
+        ensurses the user has a sufficient SDPA coin balance to cover the specified quantity
+        for sale (i.e. prevent short-selling).
 
         Parameters
         ----------
@@ -280,9 +288,9 @@ class UserAccount:
     # process user's chosen action
     def action_query(self, action, sdpa_price, current_day, user_activity_log):
         '''
-        Excecutes user's chosen actions.
+        Executes user's chosen actions.
 
-        Links user's chosen action to the relevant method, and records chosen action to the user activity log.
+        Links user's chosen action to the relevant method, and records the chosen action in the user activity log.
         
         Parameters
         ----------
@@ -390,7 +398,7 @@ class UserAccount:
         Charge electricity bill.
 
         Computes total electricity bill based on the number of active machines and the market price
-        of electricity. Deducts the user's capital balance and record the electricity expense to the
+        of electricity. Deducts the user's capital balance and record the electricity expense in the
         user activity log. 
         
         Parameters

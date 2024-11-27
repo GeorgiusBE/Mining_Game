@@ -1,3 +1,7 @@
+# Georgius Benedikt Ermanta
+# Fintech
+# This module is used to generate market price of SDPA coin and per unit of electricity.
+
 '''
 market.py
 ---------
