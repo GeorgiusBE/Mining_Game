@@ -1,7 +1,4 @@
-# PS24737_SEMTM0028
-**GitHub Repository URL:** https://github.com/GeorgiusBE/ps24737_SEMTM0028.git
-
-## Part 1 (Blockchain Simulation)
+## Blockchain Simulation
 ### Project overview
 This project simulates a blockchain mining game of a cryptocurrency called SDPA coin. Users will start with an initial capital of 50,000 GBP, and they will be tasked to manage assets, handle market dynamics, and mine SDPA coins, with the ultimate goal of gaining as much returns as possible.
 
@@ -175,37 +172,3 @@ This file contains 5 user-defined function,
 
     If electricity bill causes the balance of the user to turn negative, their SDPA holdings will automatically be sold at the end of the day at the day’s market price, just enough so that the person’s balance is no longer negative.  For example, if current balance is -$200 and the current price of SDPA coin is $60, the number of coins that needed to be sold is, 200/60 = 3.33 coins.
     If the user does not own enough SDPA coins to cover the negative capital. A message will be printed out that says that the person is bankrupt, as well as (i) the user will not be queried anymore and (ii) all of their machines will be taken offline.
-
-## Part 2 (Data Analysis on NVDA stock data)
-
-In the Data Analysis section, we will be analyzing Nvidia stock data. This includes data crawling, data cleaning, Exploratory Data Analysis (EDA), and discussion on interesting questions that can be drawn from the dataset.
-### Required Libraries
-The following Python libraries are required to run the code:
-- `requests`
-
-    Purpose: Used to send HTTP requests to fetch the webpage data from Yahoo Finance.
-    Installation: pip install requests
-- `pandas`
-
-    Purpose: Used for data manipulation and analysis.
-    Installation: pip install pandas
-- `numpy`
-
-    Purpose: Used for numerical operations.
-    Installation: pip install numpy
-- `scipy`
-
-    Purpose: Used for statistical testing in data analysis.
-    Installation: pip install scipy
-- `scikit-learn` (sklearn)
-
-    Purpose: Used for machine learning tasks, specifically linear regression modeling and evaluating the model's performance with metrics like Mean Squared Error (MSE).
-    Installation: pip install scikit-learn
-- `matplotlib`
-
-    Purpose: Used for data visualization.
-    Installation: pip install matplotlib
-- `seaborn`
-
-    Purpose: Used for data visualization.
-    Installation: pip install seaborn
